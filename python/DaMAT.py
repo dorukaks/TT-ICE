@@ -1,244 +1,69 @@
-from ast import Pass, Try
-from logging import warning
-import numpy as np
-from discord_webhook import DiscordWebhook as dcmessage
-from numpy import core
 import warnings
-from pickle import dump,load
-from datetime import datetime
 import time
 
+import numpy as np
 
-def arrcheck(A):
-    if isinstance(A,np.ndarray):
-        return A
-    else:
-        return np.array(A,order='F')
-
-def dot(X,Y):
-    X=arrcheck(X)
-    Y=arrcheck(Y)
-    X_dim=X.shape
-    Y_dim=Y.shape
-    if len(X_dim)==len(Y_dim):
-        dim=1
-        for x,y in zip(X_dim,Y_dim):
-            if x!=y:
-                raise ValueError(f"Dimension mismatch in tensors at dim={dim}: Tensor 1={x}, Tensor 2={y}!!")
-            dim+=1
-    else:
-        raise ValueError(f"Tensor 1 is {len(X_dim)}-Way, Tensor 2 is {len(Y_dim)}-Way!!")
-    result=X*Y
-    for _ in range(len(X_dim)):
-        result=sum(result)
-    return result
-
-def norm(X):
-    return(pow(dot(X,X),0.5))
-
-
-def unfold(tensor, mode ,mult_mode=False):
-    """Unfolds a tensors following the Kolda and Bader definition
-
-        Moves the `mode` axis to the beginning and reshapes in Fortran order
-
-        found at https://stackoverflow.com/questions/49970141/using-numpy-reshape-to-perform-3rd-rank-tensor-unfold-operation
-        on 09.21.2020 19.01 GMT+3
-    """
-    tens_ndim=tensor.ndim
-
-    orig_shape=tensor.shape #original tensor's shape just in case it's needed
-    if mode>tens_ndim:
-        raise ValueError("Mode exceeds tensor dimension!!")
-    elif mode<=0:
-        raise ValueError("Mode must be nonnegative!!")
-    else:
-        mode=mode-1
-    old_indices = [ii for ii in range(tens_ndim) if ii != mode]
-    num_cols_mat = np.prod([tensor.shape[ii] for ii in range(tens_ndim) if ii != mode])
-    num_rows_mat = tensor.shape[mode]
-    new_indices = [mode] + old_indices
-    new_shape = [tensor.shape[mode]] + [tensor.shape[ii] for ii in range(tens_ndim) if ii != mode]
-    unfolded_tensor = np.transpose(tensor, new_indices).reshape(num_rows_mat, num_cols_mat,order="F")
-
-    if mult_mode:
-        return unfolded_tensor,new_shape,new_indices
-    else:
-        return unfolded_tensor
-def fold(tensor, new_shape,new_indices, mode):
-    tens_folded=tensor.reshape(new_shape,order="F")
-    return np.transpose(tens_folded,new_indices)
-
-def tenprod(X,U,n):
-    """
-    n-Mode multiplication between a tensor X and a matrix/vector U
-
-    """
-    X=arrcheck(X)
-    U=arrcheck(U)
-    if len(U.shape)==2:
-        matrix=True
-    elif len(U.shape)>2:
-        raise TypeError("U is neither matrix nor vector!!")
-    else:
-        matrix=False
-    if matrix:
-        if X.shape[n-1]!=U.shape[-1]:
-            raise ValueError("Dimension mismatch between tensor A and matrix U!!")
-        X,new_shape,perm_indices=unfold(X,n,mult_mode=True)
-        Y_unfolded=np.dot(U,X)
-        new_shape[0]=U.shape[0]
-        Y_folded=fold(Y_unfolded,new_shape,perm_indices,n)
-    else:
-        U=np.transpose(U) if U.shape[0]!=1 else U
-        if X.shape[n-1]!=U.shape[1]:
-            raise ValueError("Dimension mismatch, please check mode!!")
-        new_shape=list(X.shape)
-        new_shape.pop(n-1)
-        tuple(new_shape)
-        Y_folded=np.matmul(U,unfold(X,n)).reshape(new_shape,order="F")
-    return Y_folded
-
-
-def kron(A,B):
-    if (len(np.shape(A)) != 2) or (len(np.shape(B)) != 2):
-        raise TypeError("At least one of the inputs supplied is not a matrix (2x2)")
-    a_rows=np.shape(A)[0]
-    b_rows=np.shape(B)[0]
-    a_cols=np.shape(A)[1]
-    b_cols=np.shape(B)[1]
-
-    out=np.zeros(((a_rows*b_rows),(a_cols*b_cols)))
-    for y in range(a_rows):
-        for x in range(a_cols):
-            out[y*b_rows:(y+1)*b_rows,x*b_cols:(x+1)*b_cols]=A[y,x]*B
-    return out
-
-def khatrirao(A,B):
-    if (len(np.shape(A)) != 2) or (len(np.shape(B)) != 2):
-        raise TypeError("At least one of the inputs supplied is not a matrix (2x2)")
-    a_rows=np.shape(A)[0]
-    b_rows=np.shape(B)[0]
-    a_cols=np.shape(A)[1]
-    b_cols=np.shape(B)[1]
-    if a_cols!=b_cols:
-        raise TypeError("Dimension mismatch in columns!!")
-    out=np.zeros((a_rows*b_cols,a_cols))
-    for x in range(a_cols):
-        print(kron(a[:,x].reshape((-1,1)),b[:,x].reshape((-1,1))).shape)
-        print(out[:,x*b_cols:(x+1)*b_cols].shape)
-        out[:,x*b_cols:(x+1)*b_cols]=kron(a[:,x].reshape((-1,1)),b[:,x].reshape((-1,1)))
-    return out
-
-def haddamard(A,B):
-    if A.shape!=B.shape:
-        raise TypeError("Dimension mismatch in matrices!!")
-    return A*B
-
-def ttsvd(A,eps=0.1):
-    #tensor train decomposition using svd
-    input_shape=A.shape
-    dims=len(A.shape)
-    delta=(eps/((dims-1)**(0.5)))*np.linalg.norm(A)
-    r=[1]
-    cores=[]
-    for k in range(dims-1):
-        now=datetime.now()
-        timestamp=now.strftime("%Y%m%d_%H%M")
-        print(f'k:{k}  {timestamp}')
-        nk=input_shape[k]
-        A=A.reshape((r[k]*nk,int(np.prod(A.shape)/(r[k]*nk))),order='F')
-        A=da.from_array(A)
-        uda,sda,vhda=da.linalg.svd_compressed(A,k=1e100)
-        sigma=sda.compute()
-        svallist=list(sigma*sigma)
-        svallist.reverse()
-        truncpost=[idx for idx , element in enumerate(np.cumsum(svallist)) if element<=delta**2] 
-        u=uda.compute()
-        del uda
-        cores.append(u[:,:r[k+1]].reshape((r[k],nk,r[k+1]),order='F'))
-        del u
-        vh=vhda.compute()
-        del vhda, sda
-        A=np.zeros_like(vh[:r[k+1],:])
-        for idx,si in enumerate(sigma[0:r[k+1]]):
-            A[idx,:]= si*vh[idx,:]
-        del vh
-    r.append(1)
-    cores.append(A.reshape((r[-2],input_shape[-1],r[-1]),order='F'))
-    return r,cores
-
-# @profile
-def ttsvd2(data,dataNorm,eps=0.1,dtype=np.float32):
-    inputShape=data.shape
-    dimensions=len(data.shape)
-    delta=(eps/((dimensions-1)**(0.5)))*dataNorm
-    ranks=[1]
-    cores=[]
-    for k in range(dimensions-1):
-        now=datetime.now()
-        timestamp=now.strftime("%Y%m%d_%H%M")
-        nk=inputShape[k]
-        data=data.reshape(ranks[k]*nk,int(np.prod(data.shape)/(ranks[k]*nk)),order='F').astype(dtype)
-        
-        svdTime=time.time()
-        u,s,v=np.linalg.svd(data,False,True)
-        slist=list(s*s)
-        slist.reverse()
-        truncpost=[idx for idx , element in enumerate(np.cumsum(slist)) if element<=delta**2] 
-        ranks.append(len(s)-len(truncpost))
-
-        u=u[:,:ranks[-1]]
-        
-        cores.append(u.reshape(ranks[k],nk,ranks[k+1],order='F'))
-        data=np.zeros_like(v[:ranks[-1],:])
-        for idx,sigma in enumerate(s[:ranks[-1]]):
-            data[idx,:]=sigma*v[idx,:]#.compute() #if you delete v=v[:ranks[-1],:].compute(), activate the .compute() portion!!!
-        
-    ranks.append(1)
-    cores.append(data.reshape(ranks[-2],inputShape[-1],ranks[-1],order='F'))
-    return ranks,cores
-# @profile
-def choo_choo(cores):
-    # Function for converting tt-cores to full size tensors
-    for coreIdx in range(len(cores)-1):
-        if coreIdx==0:
-            coreProd=np.tensordot(cores[coreIdx],cores[coreIdx+1],axes=(-1,0))
-        else:
-            coreProd=np.tensordot(coreProd,cores[coreIdx+1],axes=(-1,0))
-    coreProd=coreProd.reshape(coreProd.shape[1:-1])
-    return coreProd
-    
-def primes(n):
-    #function for finding prime factors for a given number, used for calculating the reshapings
-    primfac = []
-    d = 2
-    while d*d <= n:
-        while (n % d) == 0:
-            primfac.append(d)  # supposing you want multiple factors repeated
-            n //= d
-        d += 1
-    if n > 1:
-       primfac.append(n)
-    return primfac
-
-def deltaSVD(data,dataNorm,dimensions,eps=0.1):
-    #perform delta-truncated svd similar to that of the ttsvd algorithm
-    delta=(eps/((dimensions-1)**(0.5)))*dataNorm
-    try:
-        u,s,v=np.linalg.svd(data,False,True)
-    except np.linalg.LinAlgError:
-        print("Numpy svd did not converge, using qr+svd")
-        q,r=np.linalg.qr(data)
-        u,s,v=np.linalg.svd(r)
-        u=q@u        
-    slist=list(s*s)
-    slist.reverse()
-    truncpost=[idx for idx , element in enumerate(np.cumsum(slist)) if element<=delta**2] 
-    truncationRank=len(s)-len(truncpost)
-    return u[:,:truncationRank],s[:truncationRank],v[:truncationRank,:]
+from ast import Pass, Try
+from logging import warning
+from numpy import core
+from DaMATutils import * 
+from pickle import dump,load
+from datetime import datetime
+# from discord_webhook import DiscordWebhook as dcmessage
 
 class ttObject:
+    def __init__(self) -> None:
+        self.keepOriginal = False ##set this to true if you want to store the original data along with the compression (for some weird reason)
+        self.A=2
+    ## List of required class methods
+    def changeShape(self) -> None: ##function to change shape of input tensors and keeping track
+        self.A=2
+    def computeTranspose(self) -> None: ##function to transpose the axes of input tensor -> might be unnecessary
+        self.A=2
+    def indexMap(self) -> None: ## function to map the original indices to the reshaped indices
+        self.A=2
+    def primeReshaping(self) -> None: ## function to reshape the first d dimensions to prime factors
+        self.A=2
+    def saveData(self) -> None: ## function to write the computed tt-cores to a .ttc file -> should provide alternative output formats such as .txt
+        self.A=2
+    def loadData(self) -> None: ## function to load data from a .ttc file -> additional support may be included for .txt files with a certain format?
+        self.A=2
+    def ttDot(tt1,tt2) -> None:
+        self.A=2
+    def ttNorm(tt1) -> None:
+        self.A=2
+    def projectTensor(self) -> None: ## function to project tensor onto basis spanned by tt-cores
+        self.A=2
+    def reconstruct(self,projectedData,upTo=None):
+        self.A=2
+    def coreOccupancy(self) -> None: ## function to return core occupancy
+        self.A=2
+    def compressionRatio(self) -> None: ## function to compute compression ratio of existing cores
+        self.A=2
+    def updateRanks(self) -> None: ## function to update the ranks of the ttobject after incremental updates
+        self.A=2
+    def computeRelError(self,data:np.array) -> None: ## computes relative error by projecting data
+        self.A=2
+    def computeRecError(self,data:np.array,start=None,finish=None) -> None: ## computes relative error by reconstructing data
+        self.A=2
+
+
+    
+    #List of methods that will compute a decomposition
+    def ttDecomp(self) -> None: ##tt decomposition to initialize the cores, will support ttsvd for now but will be open to other computation methods
+        self.A=2
+    def ttICE(self) -> None: ##ttice algorithmn without heuristics
+        self.A=2
+    def ttICEstar(self) -> None: ##ttice* algorithmn with heuristics -> support of heuristic modifications at various level
+        self.A=2
+    def ttRound(self) -> None: ##tt rounding as per oseledets 2011 -> Might be implemented as a utility
+        self.A=2
+    def ittd(self) -> None: ##ittd method from liu2018 for comparison
+        self.A=2
+    
+
+
+class ttObjectLegacy:
     def __init__(self,data,method:str='ttsvd',epsilon=None,ranks=None,crossIter=1,originalShape=None,transposeMap=None,imageOrder=None) -> None:
         self.inputType=type(data)
         if self.inputType==np.ndarray: #if you are starting with original data (tensor form) you will give numpy arrays as input at the class initialization
@@ -249,16 +74,16 @@ class ttObject:
             self.ttEpsilon=epsilon
             self.originalShape=self.originalData.shape
             self.reshapedShape=self.originalShape
-            self.imageWidth=self.originalShape[0]
-            self.imageHeight=self.originalShape[1]
-            self.imageDepth=self.originalShape[2]
+            self.imageWidth=self.originalShape[0] ## Remove
+            self.imageHeight=self.originalShape[1] ## Remove
+            self.imageDepth=self.originalShape[2] ## Remove
             self.nElements=None
             self.imageCount=np.prod(self.originalShape[3:])
             if transposeMap==None:
                 self.transposeMap=[idx for idx in range(len(data.shape))]
             else:
                 self.transposeMap=transposeMap
-        elif self.inputType==list: #if you are starting with compressed data (tt form) you will give list of arrays as input at the class initializatio
+        elif self.inputType==list: #if you are starting with compressed data (tt form) you will give list of arrays as input at the class initialization
             self.nCores=len(data)
             self.originalData=None
             self.ttEpsilon=epsilon
@@ -278,9 +103,9 @@ class ttObject:
             self.originalShape=[cores.shape[1] for cores in data]
             self.reshapedShape=self.originalShape
             self.imageCount=np.prod(self.originalShape)//(np.prod(self.originalShape[:3]))
-            self.imageWidth=84
-            self.imageHeight=84
-            self.imageDepth=3
+            # self.imageWidth=84
+            # self.imageHeight=84
+            # self.imageDepth=3
             if transposeMap==None:
                 self.transposeMap=[idx for idx in range(len(data))]
             else:
@@ -289,7 +114,7 @@ class ttObject:
         else:
             raise TypeError("Unknown input type!")
         # These attributes will be used later for other functionalities, do not hesitate to suggest anything you find useful
-        self.singleReshapedImage=(self.imageWidth,self.imageHeight,self.imageDepth)
+        # self.singleReshapedImage=(self.imageWidth,self.imageHeight,self.imageDepth)
         self.method=method
         
         self.crossVerbose=True
@@ -300,22 +125,7 @@ class ttObject:
         self.imageOrder=imageOrder
         self.compressionTime=None
 
-    def recoveryMap(self):
-        #function used to recover single images from AG's C3 compression tool, will most likely be deleted
-        primaryIndex=[]
-        secondaryIndex=[]
-        tertiaryIndex=[]
-        for i in range(self.imageWidth):
-            primaryIndex+=[i]*self.imageDepth*self.imageHeight
-        for i in range(self.imageHeight):
-            secondaryIndex+=[i]*self.imageDepth
-        secondaryIndex=secondaryIndex*self.imageWidth
-        for i in range(self.imageDepth):
-            tertiaryIndex+=[i]
-        tertiaryIndex=tertiaryIndex*self.imageWidth*self.imageHeight
-        recoveryMap=np.concatenate((np.concatenate((np.array(primaryIndex).reshape(-1,1),np.array(secondaryIndex).reshape(-1,1)),axis=1),np.array(tertiaryIndex).reshape(-1,1)),axis=1)
-        return recoveryMap
-    def ttDecomp2(self,norm,dtype=np.float32):
+    def ttDecomp(self,norm,dtype=np.float32):
         startTime=time.time()
         self.ttRanks,self.ttCores=ttsvd2(self.originalData,norm,self.ttEpsilon,dtype=dtype)
         self.compressionTime=time.time()-startTime
@@ -324,24 +134,20 @@ class ttObject:
         for cores in self.ttCores:
             self.nElements+=np.prod(cores.shape)
         return None
-    def ttDecomp(self):
+    def ttDecompLarge(self):
         #compression function, you will prepare most of the inputs/options to this function while initializing the object
         if self.method=="ttsvd":
             startTime=time.time()
-            self.ttRanks,self.ttCores=ttsvd(self.originalData,self.ttEpsilon)
+            self.ttRanks,self.ttCores=ttsvdLarge(self.originalData,self.ttEpsilon)
             self.compressionTime=time.time()-startTime
             self.nCores=len(self.ttCores)
             self.nElements=0
-            # for cores in self.ttCores:
-            #     self.nElements+=np.prod(cores.shape)
         elif self.method=="ttcross":
             self.recoveryIndices=self.recoveryMap()
             self.ttCores=c3py.TensorTrain.cross_from_numpy_tensor(self.originalData,self.ttRanks,self.crossVerbose,self.crossRankAdapt,maxiter=self.maxCrossIter)
             self.nCores=len(self.ttCores.cores)
             self.nElements=0
             self.ttCores=self.ttCores.cores
-            # for cores in self.ttCores.cores:
-            #     self.nElements+=np.prod(cores.shape)
         else:
             raise KeyError('Method unknown. Please select a valid method!')
         for cores in self.ttCores:
@@ -413,18 +219,9 @@ class ttObject:
         else:
             return list(np.array(mappedIndex)[list(transposeMap)])
 
-    def imageIndices(self,imageNumber:int):
-        # This is a function used for image recoveries usikng AG's C3 library. Not needed for now.
-        imageNumber=[imageNumber]
-        mappedIndex=self.indexMap(self.originalShape,self.reshapedShape,imageNumber,self.singleReshapedImage,self.transposeMap)
-        indexLength=len(mappedIndex[3:])
-        imageIndex=[mappedIndex[3:]]*self.imageHeight*self.imageDepth*self.imageWidth
-        imageIndex=np.array(imageIndex).reshape(-1,indexLength)
-        indices=np.concatenate((self.recoveryIndices,imageIndex),axis=1)
-        return indices
     def primeReshaping(self,ordered=False,full:bool=False):
         # This is a function used for create reshapings with the prime factorizations
-        originalImageShape=(self.imageWidth,self.imageHeight,self.imageDepth)
+        originalImageShape=(self.imageWidth,self.imageHeight,self.imageDepth) ## Modify this
         if full:
             self.singleReshapedImage=[]
             for dimensions in originalImageShape: self.singleReshapedImage.extend(primes(dimensions))
@@ -456,12 +253,11 @@ class ttObject:
                 eval(f'imageCores.append(self.ttCores[{coreIdx}][:,'+indices+',:])')
             else:
                 raise ValueError('Unknown decomposition method!')
-
         return imageCores
     
     def returnImage(self,imageCores):
         # This function reconstructs image array from the cores passed into the function handle
-        imageArray=choo_choo(imageCores)
+        imageArray=coreContraction(imageCores)
         coreLength=len(imageArray.shape)
         if self.method=='ttcross' or self.method=='ttsvd':
             indices2Remove=list(np.arange(coreLength,len(self.ttCores),1,int))
@@ -473,7 +269,7 @@ class ttObject:
         imageArray=imageArray.reshape(self.originalShape[:3])
         return imageArray
     
-    def returnOriginalImage(self,imageIndex):
+    def returnOriginalImage(self,imageIndex): ### Replace the functionality of this code appropriately
         if type(self.originalData)!=np.ndarray:
             return None
         desiredImage=ttObject.indexMap(self.originalShape,self.reshapedShape,imageIndex,self.singleReshapedImage,self.transposeMap)
