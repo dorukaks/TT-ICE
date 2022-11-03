@@ -12,14 +12,43 @@ from datetime import datetime
 # from discord_webhook import DiscordWebhook as dcmessage
 
 class ttObject:
-    def __init__(self) -> None:
-        self.keepOriginal = False ##set this to true if you want to store the original data along with the compression (for some weird reason)
-        self.A=2
+    def __init__(self,data,keepData=False,samplesAlongLastDimension=False) -> None:
+        self.inputType=type(data)
+        self.keepOriginal = keepData ##boolean variable to determine if you want to store the original data along with the compression (for some weird reason)
+        self.nCores=None
+        self.samplesAlongLastDimension=samplesAlongLastDimension
+        # self.ttRanks=ranks
+        self.ttCores=None
+        self.originalData=data
+        self.nElements=None
+
+        if self.inputType==np.ndarray:
+            self.originalShape=data.shape
+            self.indexOrder=[idx for idx in range(len(self.originalShape))]
+        elif self.inputType==list:
+            self.nCores=len(data)
+        else:
+            raise TypeError("Unknown input type!")
+        
+
     ## List of required class methods
-    def changeShape(self) -> None: ##function to change shape of input tensors and keeping track
-        self.A=2
-    def computeTranspose(self) -> None: ##function to transpose the axes of input tensor -> might be unnecessary
-        self.A=2
+    def changeShape(self,newShape:tuple) -> tuple: ##function to change shape of input tensors and keeping track
+        # a simple numpy.reshape was sufficient for this function but in order to keep track of the shape changes the self.reshapedShape also needs to be updated
+        if self.ttCores!=None: 
+            warning("Warning! You are reshaping the original data after computing a TT-decomposition! We will proceed without reshaping self.originalData!!")
+            return None
+        self.reshapedShape=newShape
+        self.originalData=np.reshape(self.originalData,self.reshapedShape)
+        self.reshapedShape=self.originalData.shape
+        if self.samplesAlongLastDimension:
+            self.singleDataShape=self.reshapedShape[:-1] #This line assumes we keep the last index as the samples index and don't interfere with its shape
+
+    def computeTranspose(self,newOrder:list) -> list: ##function to transpose the axes of input tensor -> might be unnecessary
+        assert (self.inputType==np.ndarray and self.ttCores==None)
+        if len(newOrder)!=len(self.indexOrder): raise ValueError('size of newOrder and self.indexOrder does not match. Maybe you forgot reshaping?')
+        self.indexOrder=[self.indexOrder[idx] for idx in newOrder]
+        self.originalData=self.originalData.transpose(newOrder)
+
     def indexMap(self) -> None: ## function to map the original indices to the reshaped indices
         self.A=2
     def primeReshaping(self) -> None: ## function to reshape the first d dimensions to prime factors
