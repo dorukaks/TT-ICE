@@ -113,10 +113,24 @@ class ttObject:
         self.A=2
     def reconstruct(self,projectedData,upTo=None):
         self.A=2
+
+    @property
     def coreOccupancy(self) -> None: ## function to return core occupancy
-        self.A=2
-    def compressionRatio(self) -> None: ## function to compute compression ratio of existing cores
-        self.A=2
+        try:
+            return  [core.shape[-1]/np.prod(core.shape[:-1]) for core in self.ttCores[:-1]]
+        except ValueError:
+            warnings.warn('No TT cores exist, maybe forgot calling object.ttDecomp?',Warning)
+            return None
+    
+    @property
+    def compressionRatio(self) -> float: ## function to compute compression ratio of existing cores
+        originalNumEl=1
+        compressedNumEl=0
+        for core in self.ttCores:
+            originalNumEl*=core.shape[1]
+            compressedNumEl+=np.prod(core.shape)
+        return originalNumEl/compressedNumEl
+
     def updateRanks(self) -> None: ## function to update the ranks of the ttobject after incremental updates
         self.A=2
     def computeRelError(self,data:np.array) -> None: ## computes relative error by projecting data
