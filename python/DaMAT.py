@@ -12,7 +12,7 @@ from datetime import datetime
 # from discord_webhook import DiscordWebhook as dcmessage
 
 class ttObject:
-    def __init__(self,data,keepData=False,samplesAlongLastDimension=False) -> None:
+    def __init__(self,data,epsilon=None,keepData=False,samplesAlongLastDimension=True) -> None:
         self.inputType=type(data)
         self.keepOriginal = keepData ##boolean variable to determine if you want to store the original data along with the compression (for some weird reason)
         self.nCores=None
@@ -23,10 +23,14 @@ class ttObject:
         self.nElements=None
 
         if self.inputType==np.ndarray:
+            self.ttEpsilon=epsilon
             self.originalShape=data.shape
+            self.reshapedShape=self.originalShape
             self.indexOrder=[idx for idx in range(len(self.originalShape))]
         elif self.inputType==list:
             self.nCores=len(data)
+            self.ttCores=data
+            self.reshapedShape=[core.shape[1] for core in self.ttCores]
         else:
             raise TypeError("Unknown input type!")
         
