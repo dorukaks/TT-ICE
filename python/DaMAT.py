@@ -145,11 +145,60 @@ class ttObject:
 
     
     #List of methods that will compute a decomposition
-    def ttDecomp(self) -> None: ##tt decomposition to initialize the cores, will support ttsvd for now but will be open to other computation methods
-        self.A=2
-    def ttICE(self) -> None: ##ttice algorithmn without heuristics
-        self.A=2
-    def ttICEstar(self) -> None: ##ttice* algorithmn with heuristics -> support of heuristic modifications at various level
+    def ttDecomp(self,norm=None,dtype=np.float32) -> "ttObject.ttCores": ##tt decomposition to initialize the cores, will support ttsvd for now but will be open to other computation methods
+        if norm==None: norm=np.linalg.norm(self.originalData)
+        if self.method=='ttsvd':
+            startTime=time.time()
+            self.ttRanks,self.ttCores=ttsvd(self.originalData,norm,self.ttEpsilon,dtype=dtype)
+            self.compressionTime=time.time()-startTime
+            self.nCores=len(self.ttCores)
+            self.nElements=0
+            for cores in self.ttCores:
+                self.nElements+=np.prod(cores.shape)
+            if not self.keepOriginal:
+                self.originalData=None
+            return None
+        else:
+            raise ValueError('Method unknown. Please select a valid method!')
+
+    def ttICE(self,newTensor,epsilon=None,tenNorm=None) -> None: ##TT-ICE algorithmn without heuristics
+        if tenNorm==None: tenNorm=np.linalg.norm(newTensor)
+        if epsilon==None: epsilon=self.ttEpsilon
+        newTensorSize=len(newTensor.shape)-1
+        newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
+        # newTensor=newTensor.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:] # if line above does not work, use this one instead
+        
+        for coreIdx in range(len(self.ttCores)):
+            Ui=self.ttCores[coreIdx].reshape(np.prod(self.ttCores[coreIdx].shape[:-1]),-1)
+            if coreIdx==0:
+                newTensor=newTensor.reshape(Ui.shape[0],-1)
+            elif coreIdx==len(self.ttCores)-1:
+                pass
+            else:
+                newTensor=self.ttCores[coreIdx-1].reshape(np.prod(self.ttCores[coreIdx-1].shape[:-1]),-1).T@newTensor
+                newTensor=newTensor.reshape(Ui.shape[0],-1)
+            if coreIdx==len(self.ttCores)-1:
+                newTensor=self.ttCores[coreIdx-1].reshape(-1,self.ttCores[coreIdx-1].shape[-1]).T@newTensor
+                self.ttCores[coreIdx]=np.concatenate((tempCore,newTensor),axis=1)[:,:,None]
+                break
+            else:
+                Ri=newTensor-Ui@(Ui.T@newTensor)
+            URi,_,_=deltaSVD(Ri,tenNorm,newTensorSize,epsilon)
+            self.ttCores[coreIdx]=np.hstack((Ui,URi)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+            if coreIdx!=len(self.ttCores)-2:
+                self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
+            else:
+                tempCore=self.ttCores[coreIdx+1].squeeze(-1)
+                tempCore=np.concatenate((tempCore,np.zeros((URi.shape[1],tempCore.shape[1]))),axis=0)
+
+
+        self.ttRanks=[1]
+        for core in self.ttCores:
+            self.ttRanks.append(core.shape[-1])
+        return None
+
+
+    def ttICEstar(self,newTensor,epsilon=None,tenNorm=None,heuristicsToUse=['skip','subselect','occupancy'],occupancyThreshold=0.8) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
         self.A=2
     def ttRound(self) -> None: ##tt rounding as per oseledets 2011 -> Might be implemented as a utility
         self.A=2
