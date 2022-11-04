@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+# Additional file formats added by DA
+*.txt
