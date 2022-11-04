@@ -5,7 +5,7 @@ import numpy as np
 
 from ast import Pass, Try
 from logging import warning
-from numpy import core
+# from numpy import core
 from DaMATutils import * 
 from pickle import dump,load
 from datetime import datetime
@@ -51,12 +51,56 @@ class ttObject:
 
     def indexMap(self) -> None: ## function to map the original indices to the reshaped indices
         self.A=2
+
     def primeReshaping(self) -> None: ## function to reshape the first d dimensions to prime factors
         self.A=2
-    def saveData(self) -> None: ## function to write the computed tt-cores to a .ttc file -> should provide alternative output formats such as .txt
-        self.A=2
-    def loadData(self) -> None: ## function to load data from a .ttc file -> additional support may be included for .txt files with a certain format?
-        self.A=2
+    def saveData(self,fileName:str,directory="./",justCores=True,outputType='ttc') -> None: ## function to write the computed tt-cores to a .ttc file -> should provide alternative output formats such as .txt
+        saveFile=open(fileName+'.ttc','wb')
+        if justCores:
+            if outputType=='ttc':
+                temp=ttObject(self.ttCores)
+                for attribute in vars(self):
+                    if attribute !='originalData':
+                        setattr(temp,attribute,eval(f'self.{attribute}'))
+                dump(temp,saveFile)
+                saveFile.close()
+            elif outputType=='txt':
+                for coreIdx,core in enumerate(self.ttCores):
+                    np.savetxt(f'{fileName}_{coreIdx}.txt',core.reshape(-1,core.shape[-1]),header=f'{core.shape[0]} {core.shape[1]} {core.shape[2]}', delimiter=' ')
+            else:
+                raise ValueError(f'Output type {outputType} is not supported!')
+        else:
+            if outputType=='txt': raise ValueError(".txt type outputs are only supported for justCores=True!!")
+            if self.method=='ttsvd':# or self.method=='ttcross': ## TT-cross support might be omitted
+                dump(self,saveFile)
+                saveFile.close()
+            else:
+                raise ValueError('Unknown Method!')
+    @staticmethod
+    def loadData(fileName:str,numCores=None) -> None: ## function to load data from a .ttc file -> additional support may be included for .txt files with a certain format?
+        ''' Static method to load TT-cores into a ttObject object. 
+            Note that if data is stored in {coreFile}_{coreIdx}.txt format, the input fileName should just be coreFile.txt '''
+        fileExt=fileName.split('.')[-1]
+        if fileExt=='ttc':
+            with open(fileName,'rb') as f:
+                # loadFile=open(fileName,'rb')
+                # dataSetObject=load(loadFile)
+                # loadFile.close()
+                dataSetObject=load(f)
+            return dataSetObject
+        elif fileExt=="txt":
+            if numCores==None: raise ValueError("Number of cores are not defined!!")
+            fileBody=fileName.split('.')[0]
+            coreList=[]
+            for coreIdx in range(numCores):
+                with open(f'{fileBody}_{coreIdx}.{fileExt}'):
+                    coreShape=f.readline()[2:-1]
+                    coreShape=[int(item) for item in coreShape.split(" ")]
+                coreList.append(np.loadtxt(f'{fileBody}_{coreIdx}.{fileExt}').reshape[coreShape])
+            return coreList
+        else:
+            raise ValueError(f'{fileExt} files are not supported!')
+
     def ttDot(tt1,tt2) -> None:
         self.A=2
     def ttNorm(tt1) -> None:
