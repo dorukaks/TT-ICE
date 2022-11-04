@@ -88,9 +88,6 @@ class ttObject:
         fileExt=fileName.split('.')[-1]
         if fileExt=='ttc':
             with open(fileName,'rb') as f:
-                # loadFile=open(fileName,'rb')
-                # dataSetObject=load(loadFile)
-                # loadFile.close()
                 dataSetObject=load(f)
             return dataSetObject
         elif fileExt=="txt":
