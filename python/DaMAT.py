@@ -132,7 +132,11 @@ class ttObject:
         return originalNumEl/compressedNumEl
 
     def updateRanks(self) -> None: ## function to update the ranks of the ttobject after incremental updates
-        self.A=2
+        self.ttRanks=[1]
+        for core in self.ttCores:
+            self.ttRanks.append(core.shape[-1])
+        return None
+
     def computeRelError(self,data:np.array) -> None: ## computes relative error by projecting data
         self.A=2
     def computeRecError(self,data:np.array,start=None,finish=None) -> None: ## computes relative error by reconstructing data
