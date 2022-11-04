@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 
-from ast import Pass, Try
+# from ast import Pass, Try
 from logging import warning
 # from numpy import core
 from DaMATutils import * 
@@ -58,6 +58,7 @@ class ttObject:
 
     def primeReshaping(self) -> None: ## function to reshape the first d dimensions to prime factors
         self.A=2
+
     def saveData(self,fileName:str,directory="./",justCores=True,outputType='ttc') -> None: ## function to write the computed tt-cores to a .ttc file -> should provide alternative output formats such as .txt
         saveFile=open(fileName+'.ttc','wb')
         if justCores:
@@ -81,7 +82,7 @@ class ttObject:
             else:
                 raise ValueError('Unknown Method!')
     @staticmethod
-    def loadData(fileName:str,numCores=None) -> None: ## function to load data from a .ttc file -> additional support may be included for .txt files with a certain format?
+    def loadData(fileName:str,numCores=None) -> "ttObject": ## function to load data from a .ttc file -> additional support may be included for .txt files with a certain format?
         ''' Static method to load TT-cores into a ttObject object. 
             Note that if data is stored in {coreFile}_{coreIdx}.txt format, the input fileName should just be coreFile.txt '''
         fileExt=fileName.split('.')[-1]
