@@ -166,6 +166,14 @@ class ttObject:
         newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
         # newTensor=newTensor.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:] # if line above does not work, use this one instead
         
+        ''' 
+        WIP, start from here
+        
+        tempCore=self.ttCores[0].reshape()
+        for coreIdx in range(1,len(self.ttCores)):
+            '''
+
+
         for coreIdx in range(len(self.ttCores)):
             Ui=self.ttCores[coreIdx].reshape(np.prod(self.ttCores[coreIdx].shape[:-1]),-1)
             if coreIdx==0:
@@ -269,7 +277,7 @@ class ttObjectLegacy:
 
     def ttDecomp(self,norm,dtype=np.float32):
         startTime=time.time()
-        self.ttRanks,self.ttCores=ttsvd2(self.originalData,norm,self.ttEpsilon,dtype=dtype)
+        self.ttRanks,self.ttCores=ttsvd(self.originalData,norm,self.ttEpsilon,dtype=dtype)
         self.compressionTime=time.time()-startTime
         self.nCores=len(self.ttCores)
         self.nElements=0
