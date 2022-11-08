@@ -33,3 +33,4 @@
 
 # Additional file formats added by DA
 *.txt
+python/__pycache__/**
