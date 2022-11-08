@@ -192,10 +192,8 @@ class ttObject:
         if epsilon==None: epsilon=self.ttEpsilon
         newTensorSize=len(newTensor.shape)-1
         newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
-        # newTensor=newTensor.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:] # if line above does not work, use this one instead
-        
+        # newTensor=newTensor.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:] # if line above does not work, use this one instead  
         # Test the code, not sure if this actually works
-        
         Ui=self.ttCores[0].reshape(self.reshapedShape[0],-1)
         Ri=newTensor-Ui@(Ui.T@newTensor)
         for coreIdx in range(0,len(self.ttCores)-2):
@@ -241,14 +239,88 @@ class ttObject:
                 tempCore=self.ttCores[coreIdx+1].squeeze(-1)
                 tempCore=np.concatenate((tempCore,np.zeros((URi.shape[1],tempCore.shape[1]))),axis=0)
         ''' 
-        self.ttRanks=[1]
-        for core in self.ttCores:
-            self.ttRanks.append(core.shape[-1])
+        self.updateRanks()
+        # self.ttRanks=[1]
+        # for core in self.ttCores:
+        #     self.ttRanks.append(core.shape[-1])
         return None
 
 
     def ttICEstar(self,newTensor,epsilon=None,tenNorm=None,heuristicsToUse=['skip','subselect','occupancy'],occupancyThreshold=0.8) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
-        self.A=2
+        if tenNorm==None: tenNorm=np.linalg.norm(newTensor)
+        if epsilon==None: epsilon=self.ttEpsilon
+        if ('subselect' in heuristicsToUse) and (newTensor.shape[-1]==1): warning('The streamed tensor has only 1 observation in it. Subselect heuristic will not be useful!!')
+        updEpsilon=epsilon
+        newTensorSize=len(newTensor.shape)-1
+
+        elementwiseEpsilon=self.computeRelError(newTensor)
+        if 'skip' in heuristicsToUse:
+            if mean(elementwiseEpsilon)<=epsilon:
+                newTensor=self.projectTensor(newTensor)
+                self.ttCores[-1]=np.hstack((self.ttCores[-1].reshape(self.ttRanks[-2],-1),newTensor)).reshape(self.ttRanks[-2],-1,1)
+                return None
+        select=[True]*newTensor.shape[-1]
+        discard=[False]*newTensor.shape[-1]
+        if 'subselect' in heuristicsToUse:
+            elementwiseNorm=np.linalg.norm(newTensor,axis=0)
+            for _ in range(len(self.ttCores)-2):
+                elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
+            allowedError=(dataSet.ttEpsilon*np.linalg.norm(elementwiseNorm))**2
+            select=elementwiseEpsilon>epsilon
+            discard=elementwiseEpsilon<=epsilon
+            discardedEpsilon=np.sum((elementwiseEpsilon[select]*elementwiseNorm[select])**2)/np.sum(np.linalg.norm(elementwiseNorm[discard])**2)
+            discardedError=discardedEpsilon*(np.linalg.norm(elementwiseNorm[discard])**2)
+            updEpsilon=np.sqrt((allowedError-discardedError)/(np.linalg.norm(elementwiseNorm[select])**2))
+        
+        indexString='['
+        for _ in range(len(self.reshapedShape)-1): #this heuristic assumes that the last dimension is for observations
+            indexString+=':,'
+        selectString=indexString+"select]"
+        discardString=indexString+"discard]"
+        selected=eval('newTensor'+indexString)
+        # discarded=eval('newTensor'+indexString) #looks unnecessary, might get rid of this line#
+        
+        selected=selected.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
+        # selected=selected.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:] # if line above does not work, use this one instead  
+
+        # Test the code, not sure if this actually works
+
+        # Ui=self.ttCores[0].reshape(self.reshapedShape[0],-1)
+        for coreIdx in range(0,len(self.ttCores)-1):
+            if ('occupancy' in heuristicsToUse) and (self.coreOccupancy[coreIdx]>=occupancyThreshold):
+                #It seems like you don't need to do anything else here, but check and make sure!#
+                # continue
+                pass
+            else:
+                Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx]*self.reshapedShape[coreIdx+1],-1)
+                Ri=selected-Ui@(Ui.T@selected)
+                URi,_,_=deltaSVD(Ri,np.linalg.norm(elementwiseNorm[select]),newTensorSize,updEpsilon)
+                self.ttCores[coreIdx]=np.hstack((Ui,URi))#.reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+                self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
+
+
+            selected=(self.ttCores[coreIdx].T@selected).reshape(self.ttRanks[coreIdx+1]*self.reshapedShape[coreIdx+1]) #project onto existing core and reshape for next core
+            self.ttCores[coreIdx]=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1) #fold back the previous core
+        coreIdx+=1 # coreIdx=len(self.ttCores), i.e working on the last core
+        self.ttCores[coreIdx]=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0],-1)
+        self.ttCores[coreIdx]=np.hcat((self.ttCores[coreIdx],selected)).reshape(self.ttCores[coreIdx].shape[0],-1,1)
+
+        # # Need to check these following three lines
+        # Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
+        # newTensor=Ui.T@newTensor
+        # Ri=newTensor-Ui@(Ui.T@newTensor)
+
+        # coreIdx=len(self.ttCores)-2
+        # URi,_,_=deltaSVD(Ri,tenNorm,newTensorSize,epsilon)
+        # self.ttCores[coreIdx]=np.hstack((Ui,URi)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+        # self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
+        # newTensor=Ui.T@newTensor
+        # coreIdx+=1
+        # Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
+        # self.ttCores[coreIdx]=np.hstack((Ui,newTensor)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+        self.updateRanks()
+        return none
+        
     def ttRound(self) -> None: ##tt rounding as per oseledets 2011 -> Might be implemented as a utility
         self.A=2
     def ittd(self) -> None: ##ittd method from liu2018 for comparison
