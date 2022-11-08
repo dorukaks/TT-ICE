@@ -163,8 +163,19 @@ class ttObject:
             self.ttRanks.append(core.shape[-1])
         return None
 
-    def computeRelError(self,data:np.array) -> None: ## computes relative error by projecting data
-        self.A=2
+    def computeRelError(self,data:np.array) -> np.array: ## computes relative error by projecting data
+        elementwiseNorm=np.linalg.norm(data,axis=0)
+        for idx in range(len(data.shape)-2):
+            elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
+        projectedData=self.projectData(data)
+        reconstructedData=self.reconstruct(projectedData).reshape(data.shape)
+        difference=data-reconstructedData
+        differenceNorm=np.linalg.norm(difference,axis=0)
+        for idx in range(len(difference.shape)-2):
+            differenceNorm=np.linalg.norm(differenceNorm,axis=0)
+        relError=differenceNorm/elementwiseNorm
+        return relError
+
     def computeRecError(self,data:np.array,start=None,finish=None) -> None: ## computes relative error by reconstructing data
         self.A=2
 
@@ -320,11 +331,69 @@ class ttObject:
         # self.ttCores[coreIdx]=np.hstack((Ui,newTensor)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
         self.updateRanks()
         return none
-        
-    def ttRound(self) -> None: ##tt rounding as per oseledets 2011 -> Might be implemented as a utility
-        self.A=2
-    def ittd(self) -> None: ##ittd method from liu2018 for comparison
-        self.A=2
+
+    def ttRound(self,norm,epsilon=0) -> None: ##tt rounding as per oseledets 2011 -> Might be implemented as a utility
+        d=[core.shape[1] for core in self.ttCores]
+        for coreIdx in np.arange(len(self.ttCores))[::-1]:
+            currCore=self.ttCores[coreIdx]
+            currCore=currCore.reshape(currCore.shape[0],-1) ## Compute mode 1 unfolding of the tt-core
+            q,r=np.linalg.qr(currCore.T) ## Using the transpose results in a row orthogonal Q matrix !!!
+            q,r=q.T,r.T
+            self.ttCores[coreIdx]=q
+            self.ttCores[coreIdx-1]=np.tensordot(self.ttCores[coreIdx-1],r,axes=(-1,0)) #contract previous tt-core and R matrix
+            if coreIdx==1:
+                break
+                # pass ##TODO: write the case for the last core here.
+        ### Compression of the orthogonalized representation ###
+        ranks=[1]
+        for coreIdx in range(len(self.ttCores)-1):
+            core=self.ttCores[coreIdx]
+            core=core.reshape(np.prod(core.shape[:-1]),-1)
+            self.ttCores[coreIdx],sigma,v=deltaSVD(core,norm,len(self.ttCores),epsilon)
+            ranks.append(self.ttCores[coreIdx].shape[-1])
+            self.ttCores[coreIdx]=self.ttCores[coreIdx].reshape(ranks[coreIdx],d[coreIdx],-1) #fold matrices into tt-cores
+            self.ttCores[coreIdx+1]=((np.diag(sigma)@v)@self.ttCores[coreIdx+1]).reshape(ranks[-1]*d[coreIdx+1],-1)
+        self.ttCores[-1]=self.ttCores[-1].reshape(-1,d[-1],1)
+        self.ttRanks=[1]
+        for core in self.ttCores:
+            self.ttRanks.append(core.shape[-1])
+        return None
+
+    @staticmethod
+    def ittd(tt1,tt2,rounding=True,epsilon=0) -> "ttObject": ##ittd method from liu2018 for comparison
+        if not isinstance(tt1,ttObject) or not isinstance(tt2,ttObject):
+            if isinstance(tt1,list):
+                tt1=ttObject(tt1)
+            if isinstance(tt2,list):
+                tt2=ttObject(tt2)
+            if not isinstance(tt1,ttObject) or not isinstance(tt2,ttObject):
+                raise AttributeError('One of the passed objects is not in TT-format!')
+        tt1.ttCores[-1]=tt1.ttCores[-1].squeeze(-1)
+        tt2.ttCores[-1]=tt2.ttCores[-1].squeeze(-1)
+        rank1,numObs1=tt1.ttCores[-1].shape
+        rank2,numObs2=tt2.ttCores[-1].shape
+        tt1.ttCores[-1]=np.concatenate((tt1.ttCores[-1],np.zeros((rank1,numObs2))),axis=1)
+        tt2.ttCores[-1]=np.concatenate((np.zeros((rank2,numObs1)),tt2.ttCores[-1]),axis=1)
+        ## Addition in tt-format ##
+        for coreIdx in range(len(tt1.ttCores)):
+            if coreIdx==0:
+                tt1.ttCores[coreIdx]=np.concatenate((tt1.ttCores[coreIdx].squeeze(0),tt2.ttCores[coreIdx].squeeze(0)),axis=1)[None,:,:]
+            elif coreIdx == len(tt1.ttCores)-1:
+                # tt1.ttCores[coreIdx]=np.concatenate((tt1.ttCores[coreIdx].squeeze(-1),tt2.ttCores[coreIdx].squeeze(-1)),axis=0)[:,:,None]
+                tt1.ttCores[coreIdx]=np.concatenate((tt1.ttCores[coreIdx],tt2.ttCores[coreIdx]),axis=0)[:,:,None]
+            else:
+                s11,s12,s13=tt1.ttCores[coreIdx].shape
+                s21,s22,s23=tt2.ttCores[coreIdx].shape
+                tt1.ttCores[coreIdx]=np.concatenate((tt1.ttCores[coreIdx],np.zeros((s11,s12,s23))),axis=2)
+                tt2.ttCores[coreIdx]=np.concatenate((np.zeros((s21,s22,s13)),tt2.ttCores[coreIdx]),axis=2)
+                tt1.ttCores[coreIdx]=np.concatenate((tt1.ttCores[coreIdx],tt2.ttCores[coreIdx]),axis=0)
+        tt1.ttRanks=[1]
+        for core in tt1.ttCores:
+            tt1.ttRanks.append(core.shape[-1])
+        if rounding:
+            tenNorm=ttObject.ttNorm(tt1)
+            tt1.rounding(tenNorm,epsilon=epsilon)
+        return tt1
     
 
 
