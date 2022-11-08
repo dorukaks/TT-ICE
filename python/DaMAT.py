@@ -12,7 +12,7 @@ from datetime import datetime
 # from discord_webhook import DiscordWebhook as dcmessage
 
 class ttObject:
-    def __init__(self,data,epsilon=None,keepData=False,samplesAlongLastDimension=True) -> None:
+    def __init__(self,data,epsilon=None,keepData=False,samplesAlongLastDimension=True,method='ttsvd') -> None:
         self.inputType=type(data)
         self.keepOriginal = keepData ##boolean variable to determine if you want to store the original data along with the compression (for some weird reason)
         self.nCores=None
@@ -21,6 +21,7 @@ class ttObject:
         self.ttCores=None
         self.originalData=data
         self.nElements=None
+        self.method=method
 
         if self.inputType==np.ndarray:
             self.ttEpsilon=epsilon
@@ -135,10 +136,18 @@ class ttObject:
             norm=np.linalg.norm(tt1.ttCores[-1])
         return norm
 
-    def projectTensor(self) -> None: ## function to project tensor onto basis spanned by tt-cores
-        self.A=2
+    def projectTensor(self,newData:np.array,upTo=None) -> np.array: ## function to project tensor onto basis spanned by tt-cores
+        for coreIdx,core in enumerate(self.ttCores):
+            if (coreIdx==len(self.ttCores)-1) or coreIdx==upTo :
+                break
+            newData=(core.reshape(np.prod(core.shape[:2]),-1).transpose())@newData.reshape(self.ttRanks[coreIdx]*self.ttCores[coreIdx].shape[1],-1)
+        return newData
     def reconstruct(self,projectedData,upTo=None):
-        self.A=2
+        if upTo==None:
+            upTo=len(self.ttCores)-1 #Write the core index in 1-indexed form!!
+        for core in self.ttCores[:upTo][::-1]:
+            projectedData=np.tensordot(core,projectedData,axes=(-1,0))
+        return projectedData
 
     @property
     def coreOccupancy(self) -> None: ## function to return core occupancy
@@ -167,7 +176,7 @@ class ttObject:
         elementwiseNorm=np.linalg.norm(data,axis=0)
         for idx in range(len(data.shape)-2):
             elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
-        projectedData=self.projectData(data)
+        projectedData=self.projectTensor(data)
         reconstructedData=self.reconstruct(projectedData).reshape(data.shape)
         difference=data-reconstructedData
         differenceNorm=np.linalg.norm(difference,axis=0)
@@ -203,6 +212,7 @@ class ttObject:
         if epsilon==None: epsilon=self.ttEpsilon
         newTensorSize=len(newTensor.shape)-1
         newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
+        newTensor=newTensor.reshape(self.reshapedShape[0],-1)
         # newTensor=newTensor.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:] # if line above does not work, use this one instead  
         # Test the code, not sure if this actually works
         Ui=self.ttCores[0].reshape(self.reshapedShape[0],-1)
@@ -213,17 +223,18 @@ class ttObject:
             self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
             # Need to check these following three lines
             Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
-            newTensor=Ui.T@newTensor
-            Ui=self.ttCores[coreIdx+1].reshape(self.ttCores[coreIdx]*self.reshapedShape[coreIdx+1],-1)
+            newTensor=(Ui.T@newTensor).reshape(np.prod(self.ttCores[coreIdx+1].shape[:-1]),-1)
+            Ui=self.ttCores[coreIdx+1].reshape(self.ttCores[coreIdx].shape[-1]*self.reshapedShape[coreIdx+1],-1)
             Ri=newTensor-Ui@(Ui.T@newTensor)
         coreIdx=len(self.ttCores)-2
         URi,_,_=deltaSVD(Ri,tenNorm,newTensorSize,epsilon)
-        self.ttCores[coreIdx]=np.hstack((Ui,URi)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+        self.ttCores[coreIdx]=np.hstack((Ui,URi))#.reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
         self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
-        newTensor=Ui.T@newTensor
+        newTensor=self.ttCores[coreIdx].T@newTensor
+        self.ttCores[coreIdx]=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
         coreIdx+=1
-        Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
-        self.ttCores[coreIdx]=np.hstack((Ui,newTensor)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+        Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0],-1)
+        self.ttCores[coreIdx]=np.hstack((Ui,newTensor)).reshape(self.ttCores[coreIdx].shape[0],-1,1)
         '''
         # Remove this after testing the method above
 
