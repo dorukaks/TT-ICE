@@ -121,8 +121,20 @@ class ttObject:
             v=np.sum(p,axis=0)
         return v.item()
 
-    def ttNorm(tt1) -> None:
-        self.A=2
+    @staticmethod
+    def ttNorm(tt1) -> float:
+        if not isinstance(tt1,ttObject):
+            if isinstance(tt1,list):
+                tt1=ttObject(tt1)
+            else:
+                raise AttributeError('Passed object is not in TT-format!')
+        try:
+            norm=ttObject.ttDot(tt1,tt1)
+            norm=np.sqrt(norm)
+        except MemoryError:
+            norm=np.linalg.norm(tt1.ttCores[-1])
+        return norm
+
     def projectTensor(self) -> None: ## function to project tensor onto basis spanned by tt-cores
         self.A=2
     def reconstruct(self,projectedData,upTo=None):
