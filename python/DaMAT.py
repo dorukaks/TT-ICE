@@ -194,13 +194,29 @@ class ttObject:
         newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
         # newTensor=newTensor.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:] # if line above does not work, use this one instead
         
-        ''' 
-        WIP, start from here
+        # Test the code, not sure if this actually works
         
-        tempCore=self.ttCores[0].reshape()
-        for coreIdx in range(1,len(self.ttCores)):
-            '''
-
+        Ui=self.ttCores[0].reshape(self.reshapedShape[0],-1)
+        Ri=newTensor-Ui@(Ui.T@newTensor)
+        for coreIdx in range(0,len(self.ttCores)-2):
+            URi,_,_=deltaSVD(Ri,tenNorm,newTensorSize,epsilon)
+            self.ttCores[coreIdx]=np.hstack((Ui,URi)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+            self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
+            # Need to check these following three lines
+            Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
+            newTensor=Ui.T@newTensor
+            Ui=self.ttCores[coreIdx+1].reshape(self.ttCores[coreIdx]*self.reshapedShape[coreIdx+1],-1)
+            Ri=newTensor-Ui@(Ui.T@newTensor)
+        coreIdx=len(self.ttCores)-2
+        URi,_,_=deltaSVD(Ri,tenNorm,newTensorSize,epsilon)
+        self.ttCores[coreIdx]=np.hstack((Ui,URi)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+        self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
+        newTensor=Ui.T@newTensor
+        coreIdx+=1
+        Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
+        self.ttCores[coreIdx]=np.hstack((Ui,newTensor)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+        '''
+        # Remove this after testing the method above
 
         for coreIdx in range(len(self.ttCores)):
             Ui=self.ttCores[coreIdx].reshape(np.prod(self.ttCores[coreIdx].shape[:-1]),-1)
@@ -224,8 +240,7 @@ class ttObject:
             else:
                 tempCore=self.ttCores[coreIdx+1].squeeze(-1)
                 tempCore=np.concatenate((tempCore,np.zeros((URi.shape[1],tempCore.shape[1]))),axis=0)
-
-
+        ''' 
         self.ttRanks=[1]
         for core in self.ttCores:
             self.ttRanks.append(core.shape[-1])
