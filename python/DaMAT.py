@@ -268,7 +268,7 @@ class ttObject:
         return None
 
 
-    def ttICEstar(self,newTensor,epsilon=None,tenNorm=None,heuristicsToUse=['skip','subselect','occupancy'],occupancyThreshold=0.8) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
+    def ttICEstar(self,newTensor,epsilon=None,tenNorm=None,elementwiseNorm=None,heuristicsToUse=['skip','subselect','occupancy'],occupancyThreshold=0.8) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
         if tenNorm==None: tenNorm=np.linalg.norm(newTensor)
         if epsilon==None: epsilon=self.ttEpsilon
         if ('subselect' in heuristicsToUse) and (newTensor.shape[-1]==1): warning('The streamed tensor has only 1 observation in it. Subselect heuristic will not be useful!!')
@@ -285,9 +285,10 @@ class ttObject:
         select=[True]*newTensor.shape[-1]
         discard=[False]*newTensor.shape[-1]
         if 'subselect' in heuristicsToUse:
-            elementwiseNorm=np.linalg.norm(newTensor,axis=0)
-            for _ in range(len(self.ttCores)-1):
-                elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
+            if elementwiseNorm.any()==None:
+                elementwiseNorm=np.linalg.norm(newTensor,axis=0)
+                for _ in range(len(self.ttCores)-1):
+                    elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
             allowedError=(self.ttEpsilon*np.linalg.norm(elementwiseNorm))**2
             select=elementwiseEpsilon>epsilon
             discard=elementwiseEpsilon<=epsilon

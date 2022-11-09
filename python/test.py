@@ -103,7 +103,7 @@ while runIndices:
     stTime=time.time()
     # dataSet.ttICE(images,tenNorm=np.linalg.norm(imagesNorm))
     # print(f'ttICE completed in {round(time.time()-stTime,4)}s')
-    dataSet.ttICEstar(images,tenNorm=np.linalg.norm(imagesNorm),heuristicsToUse=heuristicsToUse)
+    dataSet.ttICEstar(images,tenNorm=np.linalg.norm(imagesNorm),heuristicsToUse=heuristicsToUse,elementwiseNorm=imagesNorm)
     print(f'ttICE* completed in {round(time.time()-stTime,4)}s')
 
 
