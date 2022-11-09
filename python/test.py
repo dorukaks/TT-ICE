@@ -21,7 +21,7 @@ heuristicsToUse=['subselect','skip','occupancy']
 epsilon=0.1
 method='ttsvd'
 game = 'MsPacman'
-runs = 5
+runs = 10
 increment = 1
 initialize = 1
 
@@ -101,8 +101,9 @@ while runIndices:
     relErrorBeforeUpdate=dataSet.computeRelError(images)
     # imageCount+=relErrorBeforeUpdate.shape[0]
     stTime=time.time()
-    dataSet.ttICE(images,tenNorm=np.linalg.norm(imagesNorm))
-    print(f'ttICE completed in {round(time.time()-stTime,4)}s')
-    # dataSet.ttICEstar(newTensor,tenNorm=np.linalg.norm(imagesNorm),heuristicsToUse=heuristicsToUse)
+    # dataSet.ttICE(images,tenNorm=np.linalg.norm(imagesNorm))
+    # print(f'ttICE completed in {round(time.time()-stTime,4)}s')
+    dataSet.ttICEstar(images,tenNorm=np.linalg.norm(imagesNorm),heuristicsToUse=heuristicsToUse)
+    print(f'ttICE* completed in {round(time.time()-stTime,4)}s')
 
 
