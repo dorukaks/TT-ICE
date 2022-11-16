@@ -268,8 +268,9 @@ class ttObject:
         return None
 
 
-    def ttICEstar(self,newTensor,epsilon=None,tenNorm=None,elementwiseNorm=None,heuristicsToUse=['skip','subselect','occupancy'],occupancyThreshold=0.8) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
-        if tenNorm==None: tenNorm=np.linalg.norm(newTensor)
+    def ttICEstar(self,newTensor,epsilon=None,tenNorm=None,elementwiseNorm=None,heuristicsToUse=['skip','subselect','occupancy'],occupancyThreshold=0.8,simpleEpsilonUpdate=False) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
+        if tenNorm==None and elementwiseNorm==None: tenNorm=np.linalg.norm(newTensor)
+        elif tenNorm==None: tenNorm=np.linalg.norm(elementwiseNorm)
         if epsilon==None: epsilon=self.ttEpsilon
         if ('subselect' in heuristicsToUse) and (newTensor.shape[-1]==1): warning('The streamed tensor has only 1 observation in it. Subselect heuristic will not be useful!!')
         newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
@@ -285,18 +286,21 @@ class ttObject:
         select=[True]*newTensor.shape[-1]
         discard=[False]*newTensor.shape[-1]
         if 'subselect' in heuristicsToUse:
-            if elementwiseNorm.any()==None:
-                elementwiseNorm=np.linalg.norm(newTensor,axis=0)
-                for _ in range(len(self.ttCores)-1):
-                    elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
-            allowedError=(self.ttEpsilon*np.linalg.norm(elementwiseNorm))**2
             select=elementwiseEpsilon>epsilon
             discard=elementwiseEpsilon<=epsilon
-            # discardedEpsilon=np.sum((elementwiseEpsilon[discard]*elementwiseNorm[discard])**2)/np.sum(np.linalg.norm(elementwiseNorm[discard])**2)
-            # discardedError=discardedEpsilon*(np.linalg.norm(elementwiseNorm[discard])**2)
-            discardedError=np.sum((elementwiseEpsilon[discard]*elementwiseNorm[discard])**2) #uncomment above two lines if this breaks something
-            updEpsilon=np.sqrt((allowedError-discardedError)/(np.linalg.norm(elementwiseNorm[select])**2))
-
+            if simpleEpsilonUpdate:
+                updEpsilon=(epsilon*newTensor.shape[-1]-np.mean(elementwiseEpsilon[discard])*discard.sum())/(select.sum())
+            else:
+                if elementwiseNorm.any()==None:
+                    elementwiseNorm=np.linalg.norm(newTensor,axis=0)
+                    for _ in range(len(self.ttCores)-1):
+                        elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
+                allowedError=(self.ttEpsilon*np.linalg.norm(elementwiseNorm))**2
+                # discardedEpsilon=np.sum((elementwiseEpsilon[discard]*elementwiseNorm[discard])**2)/np.sum(np.linalg.norm(elementwiseNorm[discard])**2)
+                # discardedError=discardedEpsilon*(np.linalg.norm(elementwiseNorm[discard])**2)
+                discardedError=np.sum((elementwiseEpsilon[discard]*elementwiseNorm[discard])**2) #uncomment above two lines if this breaks something
+                updEpsilon=np.sqrt((allowedError-discardedError)/(np.linalg.norm(elementwiseNorm[select])**2))
+        print(updEpsilon)
         # self.reshapedShape[-1]=newTensor.shape[-1]
         self.reshapedShape[-1]=select.sum() #a little trick for ease of coding
         

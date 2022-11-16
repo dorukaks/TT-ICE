@@ -18,9 +18,9 @@ cwd=os.getcwd()
 
 
 heuristicsToUse=['subselect','skip','occupancy']
-epsilon=0.1
+epsilon=0.01
 method='ttsvd'
-game = 'MsPacman'
+game = 'Qbert'
 runs = 10
 increment = 1
 initialize = 1
@@ -35,9 +35,9 @@ for _ in range(initialize):
     runPool.append(run)
     startRuns.append(run)
 if game=='MsPacman':
-    imgDir='/home/dorukaks/Desktop/GameDataProject/'+f'/{game}NoFrameskip-v4/training/full_image_all_lives/{game}NoFrameskip-v4-recorded_images-'
+    imgDir='/home/dorukaks/Desktop/GameDataProject'+f'/{game}NoFrameskip-v4/training/full_image_all_lives/{game}NoFrameskip-v4-recorded_images-'
 else:
-    imgDir=cwd+f'/{game}NoFrameskip-v4/{game}NoFrameskip-v4-recorded_images-'
+    imgDir='/home/dorukaks/Desktop/GameDataProject'+f'/{game}NoFrameskip-v4/{game}NoFrameskip-v4-recorded_images-'
 
 indexes=[]
 numIms = np.zeros(initialize)
@@ -74,9 +74,9 @@ while runIndices:
         runPool.append(run)
     numIms=np.zeros(increment)
     if game=='MsPacman':
-        imgDir='/home/dorukaks/Desktop/GameDataProject/'+f'/{game}NoFrameskip-v4/training/full_image_all_lives/{game}NoFrameskip-v4-recorded_images-'
+        imgDir='/home/dorukaks/Desktop/GameDataProject'+f'/{game}NoFrameskip-v4/training/full_image_all_lives/{game}NoFrameskip-v4-recorded_images-'
     else:
-        imgDir=cwd+f'/{game}NoFrameskip-v4/{game}NoFrameskip-v4-recorded_images-'
+        imgDir='/home/dorukaks/Desktop/GameDataProject'+f'/{game}NoFrameskip-v4/{game}NoFrameskip-v4-recorded_images-'
     indexes=[]
     for idx,runIdx in enumerate(incIndices):
         os.chdir(imgDir+f'{runIdx}')
@@ -100,10 +100,14 @@ while runIndices:
 
     relErrorBeforeUpdate=dataSet.computeRelError(images)
     # imageCount+=relErrorBeforeUpdate.shape[0]
+    norm=np.linalg.norm(imagesNorm)
     stTime=time.time()
     # dataSet.ttICE(images,tenNorm=np.linalg.norm(imagesNorm))
     # print(f'ttICE completed in {round(time.time()-stTime,4)}s')
-    dataSet.ttICEstar(images,tenNorm=np.linalg.norm(imagesNorm),heuristicsToUse=heuristicsToUse,elementwiseNorm=imagesNorm)
+    # dataSet.ttICEstar(images,tenNorm=np.linalg.norm(imagesNorm),heuristicsToUse=heuristicsToUse,elementwiseNorm=imagesNorm)
+    dataSet.ttICEstar(images,tenNorm=norm,heuristicsToUse=heuristicsToUse,elementwiseNorm=imagesNorm)
+    # dataSet.ttICEstar(images,tenNorm=norm,heuristicsToUse=heuristicsToUse,elementwiseNorm=imagesNorm,simpleEpsilonUpdate=True)
     print(f'ttICE* completed in {round(time.time()-stTime,4)}s')
+    print(dataSet.ttRanks)
 
 
