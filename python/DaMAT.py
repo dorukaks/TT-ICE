@@ -292,7 +292,7 @@ class ttObject:
             if simpleEpsilonUpdate:
                 updEpsilon=(epsilon*newTensor.shape[-1]-np.mean(elementwiseEpsilon[discard])*discard.sum())/(select.sum())
             else:
-                if elementwiseNorm.any()==None:
+                if elementwiseNorm is None:
                     elementwiseNorm=np.linalg.norm(newTensor,axis=0)
                     for _ in range(len(self.ttCores)-1):
                         elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
