@@ -329,7 +329,10 @@ class ttObject:
             else:
                 Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
                 Ri=selected-Ui@(Ui.T@selected)
-                URi,_,_=deltaSVD(Ri,np.linalg.norm(elementwiseNorm[select]),newTensorSize,updEpsilon)
+                if (elementwiseNorm is None) or ('subselect' not in heuristicsToUse):
+                    URi,_,_=deltaSVD(Ri,np.linalg.norm(selected),newTensorSize,updEpsilon)
+                else:
+                    URi,_,_=deltaSVD(Ri,np.linalg.norm(elementwiseNorm[select]),newTensorSize,updEpsilon)
                 self.ttCores[coreIdx]=np.hstack((Ui,URi))#.reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
                 self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.ttCores[coreIdx+1].shape[1],self.ttRanks[coreIdx+2]))),axis=0)
 
