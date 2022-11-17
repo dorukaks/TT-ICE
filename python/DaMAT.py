@@ -268,9 +268,7 @@ class ttObject:
         return None
 
 
-    def ttICEstar(self,newTensor,epsilon=None,tenNorm=None,elementwiseNorm=None,heuristicsToUse=['skip','subselect','occupancy'],occupancyThreshold=0.8,simpleEpsilonUpdate=False) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
-        if tenNorm==None and elementwiseNorm==None: tenNorm=np.linalg.norm(newTensor)
-        elif tenNorm==None: tenNorm=np.linalg.norm(elementwiseNorm)
+    def ttICEstar(self,newTensor:np.array,epsilon:float=None,tenNorm:float=None,elementwiseNorm:np.array=None,elementwiseEpsilon:np.array=None,heuristicsToUse:list=['skip','subselect','occupancy'],occupancyThreshold:float=0.8,simpleEpsilonUpdate:bool=False) -> None: ##TT-ICE* algorithmn with heuristics -> support of heuristic modifications at various level
         if epsilon==None: epsilon=self.ttEpsilon
         if ('subselect' in heuristicsToUse) and (newTensor.shape[-1]==1): warning('The streamed tensor has only 1 observation in it. Subselect heuristic will not be useful!!')
         newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
