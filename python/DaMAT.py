@@ -274,8 +274,8 @@ class ttObject:
         newTensor=newTensor.reshape(list(self.reshapedShape[:-1])+[-1])[None,:]
         updEpsilon=epsilon
         newTensorSize=len(newTensor.shape)-1
-
-        elementwiseEpsilon=self.computeRelError(newTensor)
+        
+        if elementwiseEpsilon is None: elementwiseEpsilon=self.computeRelError(newTensor)
         if 'skip' in heuristicsToUse:
             if np.mean(elementwiseEpsilon)<=epsilon:
                 newTensor=self.projectTensor(newTensor)
