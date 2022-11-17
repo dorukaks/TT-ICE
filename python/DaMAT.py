@@ -281,6 +281,9 @@ class ttObject:
                 newTensor=self.projectTensor(newTensor)
                 self.ttCores[-1]=np.hstack((self.ttCores[-1].reshape(self.ttRanks[-2],-1),newTensor)).reshape(self.ttRanks[-2],-1,1)
                 return None
+        if tenNorm is None and elementwiseNorm is None: tenNorm=np.linalg.norm(newTensor)
+        elif tenNorm is None: tenNorm=np.linalg.norm(elementwiseNorm)
+
         select=[True]*newTensor.shape[-1]
         discard=[False]*newTensor.shape[-1]
         if 'subselect' in heuristicsToUse:
