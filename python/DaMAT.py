@@ -309,7 +309,8 @@ class ttObject:
         for _ in range(len(self.reshapedShape)): #this heuristic assumes that the last dimension is for observations
             indexString+=':,'
         selectString=indexString+"select]"
-        discardString=indexString+"discard]"
+
+        # discardString=indexString+"discard]"
         selected=eval('newTensor'+selectString)
         # discarded=eval('newTensor'+indexString) #looks unnecessary, might get rid of this line#
         
