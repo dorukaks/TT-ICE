@@ -1,2 +1,6 @@
 datetime
+Jinja2
+MarkupSafe
 numpy
+pdoc
+Pygments
