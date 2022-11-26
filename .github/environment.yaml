@@ -5,3 +5,5 @@ dependencies:
   - python >=3.8
   - Jinja2 >=3.0
   - MarkupSafe >=2.0
+  - Pygments >=2.13
+  - pdoc >=12.3
