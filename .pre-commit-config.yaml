@@ -34,7 +34,8 @@ repos:
       exclude:
         (?x)^(
         DaMAT/legacyTtObject.py|
-        docs/make.py
+        docs/make.py|
+        DaMAT/__init__.py
         )
         # docs/make.py
 
