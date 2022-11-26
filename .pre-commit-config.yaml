@@ -31,7 +31,12 @@ repos:
         - "--max-line-length=90"
         - "--doctests"
         - "--extend-ignore=E203"
-      exclude: ^DaMAT/legacyTtObject.py
+      exclude:
+        (?x)^(
+        DaMAT/legacyTtObject.py|
+        docs/make.py
+        )
+        # docs/make.py
 
 # -   repo: https://github.com/PyCQA/flake8-docstrings
 #     rev: 1.6.0
