@@ -8,5 +8,5 @@ setup(
     author="Doruk Aksoy",
     author_email="doruk@umich.edu",
     packages=["DaMAT"],
-    install_requires=["numpy", "pickle", "datetime"],
+    install_requires=["numpy", "datetime"],
 )
