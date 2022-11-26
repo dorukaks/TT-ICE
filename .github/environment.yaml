@@ -1,0 +1,7 @@
+name: docBuild
+channels:
+  -pip
+dependencies:
+  - python >=3.8
+  - Jinja2 >=3.0
+  - MarkupSafe >=2.0

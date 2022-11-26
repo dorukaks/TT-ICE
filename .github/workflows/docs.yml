@@ -18,18 +18,19 @@ jobs:
   # Build the documentation and upload the static HTML files as an artifact.
   build:
     runs-on: ubuntu-latest
+    name: Deploy Docs to Github Pages
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version-file: .github/python-version.txt
-
+      - uses: conda-incubator/setup-miniconda@v2
       # ADJUST THIS: install all dependencies (including pdoc)
       - run: pip install -e .
       # ADJUST THIS: build your documentation into docs/.
       # We use a custom build script for pdoc itself, ideally you just run `pdoc -o docs/ ...` here.
-      # - run: python docs/make.py
-      - run: pdoc -o docs/
+      - run: python docs/make.py
+      # - run: pdoc -o docs/
 
       - uses: actions/upload-pages-artifact@v1
         with:
