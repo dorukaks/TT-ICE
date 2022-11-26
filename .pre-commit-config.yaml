@@ -14,7 +14,7 @@ repos:
     - id: check-merge-conflict
 
 -   repo: https://github.com/ambv/black
-    rev: 22.3.0
+    rev: 22.10.0
     hooks:
     - id: black
       language: python
@@ -30,7 +30,8 @@ repos:
       args:
         - "--max-line-length=90"
         - "--doctests"
-      exclude: ^python/DaMAT2beremoved.py
+        - "--extend-ignore=E203"
+      exclude: ^DaMAT/legacyTtObject.py
 
 # -   repo: https://github.com/PyCQA/flake8-docstrings
 #     rev: 1.6.0
