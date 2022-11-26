@@ -19,14 +19,29 @@ repos:
     - id: black
       language: python
       types: [python]
-      args: ["--line-length=90"]
+      args:
+        - --line-length=90
 
 -   repo: https://github.com/PyCQA/flake8
     rev: 5.0.4
     hooks:
     - id: flake8
+      language: python
+      args:
+        - "--max-line-length=90"
+        - "--doctests"
+      exclude: ^python/DaMAT2beremoved.py
+
+# -   repo: https://github.com/PyCQA/flake8-docstrings
+#     rev: 1.6.0
+#     hooks:
+#     - id: flake8-docstrings
+#       language: python
+#       args:
+#         - "--docstring-convention=numpy"
+#       exclude: ^python/DaMAT2beremoved.py
 
 -   repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.6
     hooks:
-    -   id: clang-format
+    - id: clang-format
