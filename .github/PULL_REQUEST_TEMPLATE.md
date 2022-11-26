@@ -1,7 +1,7 @@
 ## Purpose
 Explain the goal of this PR, if it addresses an existing issue be sure to link to it.
 Describe the big picture of your changes here, perhaps using a bullet list if multiple changes are done to accomplish a single goal.
-If it accomplishes multiple goals, it would be best to create separate PR's for each. 
+If it accomplishes multiple goals, it would be best to create separate PR's for each.
 
 ## Type of change
 What types of change is it?
