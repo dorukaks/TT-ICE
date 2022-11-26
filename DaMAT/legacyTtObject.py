@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class ttObjectLegacy:
     def __init__(
         self,
