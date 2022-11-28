@@ -7,20 +7,60 @@ from logging import warning
 from .utils import deltaSVD, ttsvd
 from pickle import dump, load
 
+"""
+This is a python object for tensors in TT-format.
+Through this object you can compute TT-decomposition of multidimensional arrays in
+one shot using [TTSVD algorithm](https://epubs.siam.org/doi/epdf/10.1137/090752286)
+or incrementally using [TT-ICE algorithm](https://arxiv.org/abs/2211.12487).
+
+Furthermore, this object allows exporting and importing TT-cores using native
+format (`.ttc`) and intermediary formats (`.txt`).
+"""
+
 
 class ttObject:
-    """Python object for tensors in Tensor-Train format."""
+    """
+    Python object for tensors in Tensor-Train format.
+    """
+
+    data: np.array or list
+    """
+    Main input to the ttObject. It can either be a multidimensional `numpy array`
+    or `list of numpy arrays`.
+    If list of numpy arrays are presented as input, the object will interpret it
+    as the TT-cores of an existing decomposition.
+    """
+    epsilon: float
+    """The relative error upper bound desired for approximation."""
+    keepData: bool
+    """
+    Optional boolean variable to determine if the original array will be kept after
+    compression.
+    """
+    samplesAlongLastDimension: bool
+    """
+    Boolean variable to ensure if the samples are stacked along the last dimension.
+    Assumed to be `True` since it is one of the assumptions in TT-ICE.
+    """
+    method: str
+    """
+    Determines the computation method for tensor train decomposition of
+    the multidimensional array presented as `data`. Set to __ttsvd__ by default.
+
+    Currently the package only has support for ttsvd, additional support such as
+    `ttcross` might be included in the future.
+    """
 
     def __init__(
         self,
         data,
-        epsilon=None,
-        keepData=False,
-        samplesAlongLastDimension=True,
-        method="ttsvd",
+        epsilon: float = None,
+        keepData: bool = False,
+        samplesAlongLastDimension: bool = True,
+        method: str = "ttsvd",
     ) -> None:
         self.inputType = type(data)
-        self.keepOriginal = keepData  # determines if you want to store the original data
+        self.keepOriginal = keepData
         self.nCores = None
         self.samplesAlongLastDimension = samplesAlongLastDimension
         # self.ttRanks=ranks
