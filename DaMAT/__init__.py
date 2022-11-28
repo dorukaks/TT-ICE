@@ -1,7 +1,11 @@
-"""This python package offers support for Tensor-Train"""
-"""Testing which is getting written"""
-r"""Test if this is getting print out"""
-from .ttObject import ttObject
+"""
+Welcome to DaMAT package documentation!
 
-"""test 1 2"""
-r"""test 3 4"""
+
+This python package currently offers support for multidimensional tensors in Tensor-Train format.
+We use the TT-SVD algorithm proposed by Ivan Oseledets and TT-ICE algorithm proposed by Doruk Aksoy.
+
+In future releases, the coverage may be extended to other tensor decomposition formats such as CP and/or Tucker.
+"""
+
+from .ttObject import ttObject
