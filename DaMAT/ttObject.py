@@ -62,6 +62,13 @@ class ttObject:
         this attribute is only meaningful before computing a TT-decomposition
     indexOrder: :obj:`list` of :obj:`int`
         Keeps track of original indices in case of transposing the input array.
+    .. _TTSVD:
+        https://epubs.siam.org/doi/epdf/10.1137/090752286
+        _TT-ICE:
+        https://arxiv.org/abs/2211.12487
+        _TT-ICE*:
+        https://arxiv.org/abs/2211.12487
+
     """
 
     data: np.array or list
