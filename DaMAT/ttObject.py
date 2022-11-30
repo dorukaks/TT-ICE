@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This is a python object for tensors in TT-format.
+This is a python class for tensors in TT-format.
 Through this object you can compute TT-decomposition of multidimensional arrays in
 one shot using [TTSVD algorithm](https://epubs.siam.org/doi/epdf/10.1137/090752286)
 or incrementally using [TT-ICE algorithm](https://arxiv.org/abs/2211.12487).
@@ -71,34 +71,6 @@ class ttObject:
 
     """
 
-    data: np.array or list
-    """
-    Main input to the ttObject. It can either be a multidimensional `numpy array`
-    or `list of numpy arrays`.
-    If list of numpy arrays are presented as input, the object will interpret it
-    as the TT-cores of an existing decomposition.
-    """
-    epsilon: float
-    """The relative error upper bound desired for approximation."""
-    keepData: bool
-    """
-    Optional boolean variable to determine if the original array will be kept after
-    compression.
-    """
-    samplesAlongLastDimension: bool
-    """
-    Boolean variable to ensure if the samples are stacked along the last dimension.
-    Assumed to be `True` since it is one of the assumptions in TT-ICE.
-    """
-    method: str
-    """
-    Determines the computation method for tensor train decomposition of
-    the multidimensional array presented as `data`. Set to __ttsvd__ by default.
-
-    Currently the package only has support for ttsvd, additional support such as
-    `ttcross` might be included in the future.
-    """
-
     def __init__(
         self,
         data,
@@ -107,7 +79,33 @@ class ttObject:
         samplesAlongLastDimension: bool = True,
         method: str = "ttsvd",
     ) -> None:
-        """ """
+        """
+        Initializes the ttObject.
+
+        Parameters
+        ----------
+        data: :obj:'numpy.array` or :obj:`list`
+            Main input to the ttObject. It can either be a multidimensional `numpy array`
+            or `list of numpy arrays`.
+            If list of numpy arrays are presented as input, the object will interpret it
+            as the TT-cores of an existing decomposition.
+        epsilon: :obj:`float`, optional
+            The relative error upper bound desired for approximation. Optional for cases
+            when `data` has type `list`.
+        keepData: :obj:`bool`, optional
+            Optional boolean variable to determine if the original array will be kept
+            after compression. Set to `False` by default.
+        samplesAlongLastDimension: :obj:`bool`, optional
+            Boolean variable to ensure if the samples are stacked along the last
+            dimension. Assumed to be `True` since it is one of the assumptions in TT-ICE.
+        method: :obj:`str`,optional
+            Determines the computation method for tensor train decomposition of
+            the multidimensional array presented as `data`. Set to `'ttsvd'` by default.
+
+            Currently the package only has support for ttsvd, additional support such as
+            `ttcross` might be included in the future.
+
+        """
         # self.ttRanks=ranks
         self.ttCores = None
         self.nCores = None
