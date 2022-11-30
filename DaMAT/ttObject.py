@@ -233,9 +233,11 @@ class ttObject:
         """
         self.A = 2
 
-    def primeReshaping(
-        self,
-    ) -> None:  # function to reshape the first d dimensions to prime factors
+    def primeReshaping(self) -> None:
+        """
+        Function to reshape the first d dimensions to prime factors.
+        Currently not implemented
+        """
         self.A = 2
 
     def saveData(
