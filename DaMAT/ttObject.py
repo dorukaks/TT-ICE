@@ -38,23 +38,30 @@ class ttObject:
 
     Attributes
     ----------
-    ttEpsilon: :obj:`float`
-        Desired relative error upper bound.
-    originalShape: :obj:`tuple` or :obj:`list`
-        Original shape of the multidimensional array.
     inputType: type
         Type of the input data. This determines how the object is initialized.
-    ttCores: :obj:`list` of :obj:`numpy.array`
-        Cores of the TT-decomposition. Stored as a list of numpy arrays.
-    nElements: :obj:`int`
-        Number of entries present in the current `ttObject`.
-    method: :obj:`str`
-        Method of computing the initial set of TT-cores. Currently only accepts
-        `'ttsvd'` as input
     originalData:
         Original multidimensional input array. Generally will not be stored
         after computing
         an initial set of TT-cores.
+    method: :obj:`str`
+        Method of computing the initial set of TT-cores. Currently only accepts
+        `'ttsvd'` as input
+    ttEpsilon: :obj:`float`
+        Desired relative error upper bound.
+    ttCores: :obj:`list` of :obj:`numpy.array`
+        Cores of the TT-decomposition. Stored as a list of numpy arrays.
+    nCores: :obj:`int`
+        Number of TT-cores in the decomposition.
+    nElements: :obj:`int`
+        Number of entries present in the current `ttObject`.
+    originalShape: :obj:`tuple` or :obj:`list`
+        Original shape of the multidimensional array.
+    reshapedShape: :obj:`tuple` or :obj:`list`
+        Shape of the multidimensional array after reshaping. Note that
+        this attribute is only meaningful before computing a TT-decomposition
+    indexOrder: :obj:`list` of :obj:`int`
+        Keeps track of original indices in case of transposing the input array.
     """
 
     data: np.array or list
