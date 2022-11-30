@@ -44,13 +44,13 @@ class ttObject:
         Original shape of the multidimensional array.
     inputType: type
         Type of the input data. This determines how the object is initialized.
-    ttCores: :obj:`list` of :obj:`numpy.array'
+    ttCores: :obj:`list` of :obj:`numpy.array`
         Cores of the TT-decomposition. Stored as a list of numpy arrays.
     nElements: :obj:`int`
         Number of entries present in the current `ttObject`
     method: :obj:`str`
         Method of computing the initial set of TT-cores. Currently only accepts
-        `ttsvd` as input
+        `'ttsvd'` as input
     originalData:
         Original multidimensional input array. Generally will not be stored
         after computing
