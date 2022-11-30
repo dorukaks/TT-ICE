@@ -149,6 +149,10 @@ class ttObject:
     def compressionRatio(
         self,
     ) -> float:  # function to compute compression ratio of existing cores
+        """
+        :obj: `float`: A metric showing how much compression with respect to the
+        original multidimensional array is achieved.
+        """
         originalNumEl = 1
         compressedNumEl = 0
         for core in self.ttCores:
