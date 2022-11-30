@@ -199,9 +199,24 @@ class ttObject:
             ]  # This line assumes we keep the last index as the samples index and don't
             # interfere with its shape
 
-    def computeTranspose(
-        self, newOrder: list
-    ) -> list:  # function to transpose the axes of input tensor -> might be unnecessary
+    def computeTranspose(self, newOrder: list) -> None:
+        """
+        Transposes the axes of `originalData`. Similar to `changeShape`, a simple
+        `numpy.transpose` would be sufficient for this purpose but in order to
+        keep track of the transposition order `indexOrder` attribute also needs
+        to be updated accordingly.
+
+        Parameters
+        ----------
+        newOrder:obj:`list`
+            New order of the axes.
+
+        Raises
+        ------
+        ValueError
+            When the number of transposition axes are not equal to the number of
+            dimensions of `originalData`.
+        """
         assert self.inputType == np.ndarray and self.ttCores is None
         if len(newOrder) != len(self.indexOrder):
             raise ValueError(
