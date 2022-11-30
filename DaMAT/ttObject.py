@@ -242,8 +242,23 @@ class ttObject:
 
     def saveData(
         self, fileName: str, directory="./", justCores=True, outputType="ttc"
-    ) -> None:  # function to write the computed tt-cores to a .ttc file
-        saveFile = open(fileName + ".ttc", "wb")
+    ) -> None:
+        """
+        Writes the computed TT-cores to an external file.
+
+        Parameters
+        ----------
+        fileName:obj:`str`
+
+        directory:obj:`str`
+            Location to save files with respect to the present working directory.
+        justCores:obj:`bool`
+            Boolean variable to determine if `originalData` will be discarded
+            or not while saving.
+        outputType:obj:`str`
+            Type of the output file. `ttc` for pickled `ttObject`, `txt` for
+            individual text files for each TT-core.
+        """
         if justCores:
             if outputType == "ttc":
                 with open(directory + fileName + ".ttc", "wb") as saveFile:
