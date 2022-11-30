@@ -130,6 +130,11 @@ class ttObject:
 
     @property
     def coreOccupancy(self) -> None:  # function to return core occupancy
+        """
+        :obj:`list` of :obj"`float`: A metric showing the *relative rank* of each
+        TT-core. This metric is used for a heuristic enhancement tool in `TT-ICE*`
+        algorithm
+        """
         try:
             return [
                 core.shape[-1] / np.prod(core.shape[:-1]) for core in self.ttCores[:-1]
