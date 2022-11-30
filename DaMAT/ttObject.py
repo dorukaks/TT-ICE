@@ -22,6 +22,39 @@ from pickle import dump, load
 class ttObject:
     """
     Python object for tensors in Tensor-Train format.
+
+    This object computes the TT-decomposition of multidimensional arrays using `TTSVD`_,
+    `TT-ICE`_, and `TT-ICE*`_.
+    It furthermore contains an inferior method, ITTD, for benchmarking purposes.
+
+    This object handles various operations in TT-format such as dot product and norm.
+    Also provides supporting operations for uncompressed multidimensional arrays such as
+    reshaping and transpose.
+    Once the tensor train approximation for a multidimensional array is computed, you can
+    compute projection of appropriate arrays onto the TT-cores, reconstruct projected
+    or compressed tensors and compute projection/compression accuracy.
+
+    You can also save/load tensors as `.ttc` or `.txt` files.
+
+    Attributes
+    ----------
+    ttEpsilon: :obj:`float`
+        Desired relative error upper bound.
+    originalShape: :obj:`tuple` or :obj:`list`
+        Original shape of the multidimensional array.
+    inputType: type
+        Type of the input data. This determines how the object is initialized.
+    ttCores: :obj:`list` of :obj:`numpy.array'
+        Cores of the TT-decomposition. Stored as a list of numpy arrays.
+    nElements: :obj:`int`
+        Number of entries present in the current `ttObject`
+    method: :obj:`str`
+        Method of computing the initial set of TT-cores. Currently only accepts
+        `ttsvd` as input
+    originalData:
+        Original multidimensional input array. Generally will not be stored
+        after computing
+        an initial set of TT-cores.
     """
 
     data: np.array or list
@@ -51,10 +84,6 @@ class ttObject:
     Currently the package only has support for ttsvd, additional support such as
     `ttcross` might be included in the future.
     """
-    trial: float
-    """
-    Just putting this here to test if it will get displayed
-    """
 
     def __init__(
         self,
@@ -64,15 +93,16 @@ class ttObject:
         samplesAlongLastDimension: bool = True,
         method: str = "ttsvd",
     ) -> None:
-        self.inputType = type(data)
-        self.keepOriginal = keepData
-        self.nCores = None
-        self.samplesAlongLastDimension = samplesAlongLastDimension
+        """ """
         # self.ttRanks=ranks
         self.ttCores = None
-        self.originalData = data
+        self.nCores = None
         self.nElements = None
+        self.inputType = type(data)
         self.method = method
+        self.keepOriginal = keepData
+        self.originalData = data
+        self.samplesAlongLastDimension = samplesAlongLastDimension
 
         if self.inputType == np.ndarray:
             self.ttEpsilon = epsilon
