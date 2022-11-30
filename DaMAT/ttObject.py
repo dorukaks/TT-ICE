@@ -128,6 +128,29 @@ class ttObject:
         else:
             raise TypeError("Unknown input type!")
 
+    @property
+    def coreOccupancy(self) -> None:  # function to return core occupancy
+        try:
+            return [
+                core.shape[-1] / np.prod(core.shape[:-1]) for core in self.ttCores[:-1]
+            ]
+        except ValueError:
+            warnings.warn(
+                "No TT cores exist, maybe forgot calling object.ttDecomp?", Warning
+            )
+            return None
+
+    @property
+    def compressionRatio(
+        self,
+    ) -> float:  # function to compute compression ratio of existing cores
+        originalNumEl = 1
+        compressedNumEl = 0
+        for core in self.ttCores:
+            originalNumEl *= core.shape[1]
+            compressedNumEl += np.prod(core.shape)
+        return originalNumEl / compressedNumEl
+
     # List of required class methods
     def changeShape(
         self, newShape: tuple
@@ -295,29 +318,6 @@ class ttObject:
         for core in self.ttCores[:upTo][::-1]:
             projectedData = np.tensordot(core, projectedData, axes=(-1, 0))
         return projectedData
-
-    @property
-    def coreOccupancy(self) -> None:  # function to return core occupancy
-        try:
-            return [
-                core.shape[-1] / np.prod(core.shape[:-1]) for core in self.ttCores[:-1]
-            ]
-        except ValueError:
-            warnings.warn(
-                "No TT cores exist, maybe forgot calling object.ttDecomp?", Warning
-            )
-            return None
-
-    @property
-    def compressionRatio(
-        self,
-    ) -> float:  # function to compute compression ratio of existing cores
-        originalNumEl = 1
-        compressedNumEl = 0
-        for core in self.ttCores:
-            originalNumEl *= core.shape[1]
-            compressedNumEl += np.prod(core.shape)
-        return originalNumEl / compressedNumEl
 
     def updateRanks(
         self,
