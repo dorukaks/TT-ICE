@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This is a python object for tensors in TT-format.
 Through this object you can compute TT-decomposition of multidimensional arrays in
@@ -49,6 +50,10 @@ class ttObject:
 
     Currently the package only has support for ttsvd, additional support such as
     `ttcross` might be included in the future.
+    """
+    trial: float
+    """
+    Just putting this here to test if it will get displayed
     """
 
     def __init__(
