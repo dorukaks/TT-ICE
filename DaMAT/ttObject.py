@@ -84,7 +84,7 @@ class ttObject:
 
         Parameters
         ----------
-        data: :obj:'numpy.array` or :obj:`list`
+        data: :obj:`numpy.array` or :obj:`list`
             Main input to the ttObject. It can either be a multidimensional `numpy array`
             or `list of numpy arrays`.
             If list of numpy arrays are presented as input, the object will interpret it
