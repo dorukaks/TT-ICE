@@ -226,9 +226,11 @@ class ttObject:
         self.indexOrder = [self.indexOrder[idx] for idx in newOrder]
         self.originalData = self.originalData.transpose(newOrder)
 
-    def indexMap(
-        self,
-    ) -> None:  # function to map the original indices to the reshaped indices
+    def indexMap(self) -> None:
+        """
+        Function to map the original indices to the reshaped indices.
+        Currently not implemented.
+        """
         self.A = 2
 
     def primeReshaping(
