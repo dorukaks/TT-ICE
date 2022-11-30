@@ -30,7 +30,7 @@ jobs:
       # ADJUST THIS: build your documentation into docs/.
       # We use a custom build script for pdoc itself, ideally you just run `pdoc -o docs/ ...` here.
       # - run: python docs/make.py
-      - run: pdoc -o docs/ DaMAT/.
+      - run: pdoc --docformat numpy -o docs/ DaMAT/.
 
       - uses: actions/upload-pages-artifact@v1
         with:
