@@ -131,7 +131,7 @@ class ttObject:
     @property
     def coreOccupancy(self) -> None:  # function to return core occupancy
         """
-        :obj:`list` of :obj"`float`: A metric showing the *relative rank* of each
+        :obj:`list` of :obj:`float`: A metric showing the *relative rank* of each
         TT-core. This metric is used for a heuristic enhancement tool in `TT-ICE*`
         algorithm
         """
@@ -150,7 +150,7 @@ class ttObject:
         self,
     ) -> float:  # function to compute compression ratio of existing cores
         """
-        :obj: `float`: A metric showing how much compression with respect to the
+        :obj:`float`: A metric showing how much compression with respect to the
         original multidimensional array is achieved.
         """
         originalNumEl = 1
