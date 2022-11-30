@@ -146,9 +146,7 @@ class ttObject:
             return None
 
     @property
-    def compressionRatio(
-        self,
-    ) -> float:  # function to compute compression ratio of existing cores
+    def compressionRatio(self) -> float:
         """
         :obj:`float`: A metric showing how much compression with respect to the
         original multidimensional array is achieved.
