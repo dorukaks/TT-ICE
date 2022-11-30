@@ -1,12 +1,6 @@
 import warnings
 import time
 
-import numpy as np
-
-from logging import warning
-from .utils import deltaSVD, ttsvd
-from pickle import dump, load
-
 """
 This is a python object for tensors in TT-format.
 Through this object you can compute TT-decomposition of multidimensional arrays in
@@ -16,6 +10,12 @@ or incrementally using [TT-ICE algorithm](https://arxiv.org/abs/2211.12487).
 Furthermore, this object allows exporting and importing TT-cores using native
 format (`.ttc`) and intermediary formats (`.txt`).
 """
+
+import numpy as np
+
+from logging import warning
+from .utils import deltaSVD, ttsvd
+from pickle import dump, load
 
 
 class ttObject:
