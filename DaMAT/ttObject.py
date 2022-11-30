@@ -242,16 +242,16 @@ class ttObject:
         saveFile = open(fileName + ".ttc", "wb")
         if justCores:
             if outputType == "ttc":
-                temp = ttObject(self.ttCores)
-                for attribute in vars(self):
-                    if attribute != "originalData":
-                        setattr(temp, attribute, eval(f"self.{attribute}"))
-                dump(temp, saveFile)
-                saveFile.close()
+                with open(directory + fileName + ".ttc", "wb") as saveFile:
+                    temp = ttObject(self.ttCores)
+                    for attribute in vars(self):
+                        if attribute != "originalData":
+                            setattr(temp, attribute, eval(f"self.{attribute}"))
+                    dump(temp, saveFile)
             elif outputType == "txt":
                 for coreIdx, core in enumerate(self.ttCores):
                     np.savetxt(
-                        f"{fileName}_{coreIdx}.txt",
+                        directory + f"{fileName}_{coreIdx}.txt",
                         core.reshape(-1, core.shape[-1]),
                         header=f"{core.shape[0]} {core.shape[1]} {core.shape[2]}",
                         delimiter=" ",
@@ -263,11 +263,9 @@ class ttObject:
                 raise ValueError(
                     ".txt type outputs are only supported for justCores=True!!"
                 )
-            if (
-                self.method == "ttsvd"
-            ):  # or self.method=='ttcross': # TT-cross support might be omitted
-                dump(self, saveFile)
-                saveFile.close()
+            if self.method == "ttsvd":
+                with open(directory + fileName + ".ttc", "wb") as saveFile:
+                    dump(self, saveFile)
             else:
                 raise ValueError("Unknown Method!")
 
