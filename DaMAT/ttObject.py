@@ -47,7 +47,7 @@ class ttObject:
     ttCores: :obj:`list` of :obj:`numpy.array`
         Cores of the TT-decomposition. Stored as a list of numpy arrays.
     nElements: :obj:`int`
-        Number of entries present in the current `ttObject`
+        Number of entries present in the current `ttObject`.
     method: :obj:`str`
         Method of computing the initial set of TT-cores. Currently only accepts
         `'ttsvd'` as input
