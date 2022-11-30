@@ -160,12 +160,30 @@ class ttObject:
             compressedNumEl += np.prod(core.shape)
         return originalNumEl / compressedNumEl
 
-    # List of required class methods
-    def changeShape(
-        self, newShape: tuple
-    ) -> tuple:  # function to change shape of input tensors and keeping track
-        # a simple numpy.reshape was sufficient for this function but in order to keep
-        # track of the shape changes the self.reshapedShape also needs to be updated
+    def changeShape(self, newShape: tuple or list) -> None:
+        """
+        Function to change shape of input tensors and keeping track of the reshaping.
+        Reshapes `originalData` and saves the final shape in `reshapedShape`
+
+        Note
+        ----
+        A simple `numpy.reshape` would be sufficient for this purpose but in order to keep
+        track of the shape changes the `reshapedShape` attribute also needs to be updated
+        accordingly.
+
+        Parameters
+        ----------
+        newShape:obj:`tuple` or `list`
+            New shape of the tensor
+
+        Raises
+        ------
+        warning
+            If an attempt is done to modify the shape after computing a TT-decomposition.
+            This is important since it will cause incompatibilities in other functions
+            regarding the shape of the uncompressed tensor.
+
+        """
         if self.ttCores is not None:
             warning(
                 "Warning! You are reshaping the original data after computing a\
