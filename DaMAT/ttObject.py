@@ -1,6 +1,3 @@
-import warnings
-import time
-
 """
 This is a python object for tensors in TT-format.
 Through this object you can compute TT-decomposition of multidimensional arrays in
@@ -10,6 +7,9 @@ or incrementally using [TT-ICE algorithm](https://arxiv.org/abs/2211.12487).
 Furthermore, this object allows exporting and importing TT-cores using native
 format (`.ttc`) and intermediary formats (`.txt`).
 """
+
+import warnings
+import time
 
 import numpy as np
 
