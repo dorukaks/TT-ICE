@@ -576,7 +576,9 @@ class ttObject:
                 )
         # print(updEpsilon)
         # self.reshapedShape[-1]=newTensor.shape[-1]
-        self.reshapedShape[-1] = select.sum()  # a little trick for ease of coding
+        self.reshapedShape[-1] = np.array(
+            select
+        ).sum()  # a little trick for ease of coding
 
         indexString = "["
         for _ in range(
