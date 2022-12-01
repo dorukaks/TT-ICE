@@ -572,7 +572,7 @@ class ttObject:
                     (allowedError - discardedError)
                     / (np.linalg.norm(elementwiseNorm[select]) ** 2)
                 )
-        print(updEpsilon)
+        # print(updEpsilon)
         # self.reshapedShape[-1]=newTensor.shape[-1]
         self.reshapedShape[-1] = select.sum()  # a little trick for ease of coding
 
