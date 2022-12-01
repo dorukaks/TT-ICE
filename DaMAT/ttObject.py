@@ -303,6 +303,16 @@ class ttObject:
         If data is stored in {coreFile}_{coreIdx}.txt format,
         the input fileName should just be coreFile.txt
 
+        Parameters
+        ----------
+        fileName:obj:`str`
+            Name of the file that will be loaded.
+        numCores:obj:`int`
+            Number of cores that the resulting `ttObject` will have
+            (Only required when input data format is `.txt`)
+
+    
+
         """
         fileExt = fileName.split(".")[-1]
         if fileExt == "ttc":
