@@ -33,4 +33,4 @@
 
 # Additional file formats added by DA
 array*
-python/__pycache__/**
+*/__pycache__/**
