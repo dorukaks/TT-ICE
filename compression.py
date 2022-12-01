@@ -12,7 +12,8 @@ occThreshold = 1
 
 data = np.load(
     # "/home/doruk/Downloads/hurricane_data/data/hurricane_image_train.npy", mmap_mode="r"
-    "/home/doruk/data/hurricane_image_train.npy", mmap_mode="r"
+    "/home/doruk/data/hurricane_image_train.npy",
+    mmap_mode="r"
     # "/home/doruk/data/hurricane_image_train.npy"
 )
 data = data.reshape(-1, 10, 128, 257, 6)
@@ -52,7 +53,7 @@ for idx1 in range(0, 1):
         )
         snapshotIdx += 1
 #
-overallSt=time.time()
+overallSt = time.time()
 # for idx1 in range(1, data.shape[0]):
 for idx1 in range(1, 20):
     for idx2 in range(0, data.shape[1]):
@@ -75,18 +76,18 @@ for idx1 in range(1, 20):
         snapshotIdx += 1
 #
 print(dataSet.ttRanks)
-print(f'total process took {round(time.time()-overallSt,4)}s')
-dataSet.saveData('ttCoresTrainData',outputType="txt")
+print(f"total process took {round(time.time()-overallSt,4)}s")
+dataSet.saveData("ttCoresTrainData", outputType="txt")
 
-testData=np.load(
+testData = np.load(
     # "/home/doruk/Downloads/hurricane_data/data/hurricane_image_train.npy", mmap_mode="r"
     # "/home/doruk/data/hurricane_image_test.npy", mmap_mode="r"
     "/home/doruk/data/hurricane_image_test.npy"
 )
 
-testData=testData.transpose(dataSet.indexOrder)
-testData=testData.reshape(dataSet.reshapedShape[:-1] + [-1])
-testMatrix=dataSet.projectTensor(testData)
+testData = testData.transpose(dataSet.indexOrder)
+testData = testData.reshape(dataSet.reshapedShape[:-1] + [-1])
+testMatrix = dataSet.projectTensor(testData)
 
 
 print(testMatrix.shape)

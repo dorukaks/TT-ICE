@@ -311,7 +311,7 @@ class ttObject:
             Number of cores that the resulting `ttObject` will have
             (Only required when input data format is `.txt`)
 
-    
+
 
         """
         fileExt = fileName.split(".")[-1]
