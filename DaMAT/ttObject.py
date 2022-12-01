@@ -310,9 +310,6 @@ class ttObject:
         numCores:obj:`int`
             Number of cores that the resulting `ttObject` will have
             (Only required when input data format is `.txt`)
-
-
-
         """
         fileExt = fileName.split(".")[-1]
         if fileExt == "ttc":
