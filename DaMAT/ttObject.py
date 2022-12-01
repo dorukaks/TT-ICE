@@ -115,6 +115,8 @@ class ttObject:
         self.keepOriginal = keepData
         self.originalData = data
         self.samplesAlongLastDimension = samplesAlongLastDimension
+        if self.inputType is np.memmap:
+            self.inputType = np.ndarray
 
         if self.inputType == np.ndarray:
             self.ttEpsilon = epsilon
