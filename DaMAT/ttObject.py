@@ -290,12 +290,18 @@ class ttObject:
                 raise ValueError("Unknown Method!")
 
     @staticmethod
-    def loadData(
-        fileName: str, numCores=None
-    ) -> "ttObject":  # function to load data from a .ttc file
-        """Static method to load TT-cores into a ttObject object.
-        Note that if data is stored in {coreFile}_{coreIdx}.txt format,
-        the input fileName should just be coreFile.txt"""
+    def loadData(fileName: str, numCores=None) -> "ttObject":
+        """
+        Loads data from a `.ttc` or `.txt` file
+
+
+        Static method to load TT-cores into a ttObject object.
+        Note
+        ----
+        If data is stored in {coreFile}_{coreIdx}.txt format,
+        the input fileName should just be coreFile.txt
+
+        """
         fileExt = fileName.split(".")[-1]
         if fileExt == "ttc":
             with open(fileName, "rb") as f:
