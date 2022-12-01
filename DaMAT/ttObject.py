@@ -364,22 +364,22 @@ class ttObject:
                 tt2 = ttObject(tt2)
             if not isinstance(tt1, ttObject) or not isinstance(tt2, ttObject):
                 raise AttributeError("One of the passed objects is not in TT-format!")
-        v = np.kron(tt1.ttCores[0][:, 0, :], tt2.ttCores[0][:, 0, :])
+        prod = np.kron(tt1.ttCores[0][:, 0, :], tt2.ttCores[0][:, 0, :])
         for i1 in range(1, tt1.ttCores[0].shape[1]):
-            v += np.kron(tt1.ttCores[0][:, i1, :], tt2.ttCores[0][:, i1, :])
+            prod += np.kron(tt1.ttCores[0][:, i1, :], tt2.ttCores[0][:, i1, :])
         for coreIdx in range(1, len(tt1.ttCores)):
             p = []
             for ik in range(tt1.ttCores[coreIdx].shape[1]):
                 p.append(
-                    v
+                    prod
                     @ (
                         np.kron(
                             tt1.ttCores[coreIdx][:, ik, :], tt2.ttCores[coreIdx][:, ik, :]
                         )
                     )
                 )
-            v = np.sum(p, axis=0)
-        return v.item()
+            prod = np.sum(p, axis=0)
+        return prod.item()
 
     @staticmethod
     def ttNorm(tt1) -> float:
