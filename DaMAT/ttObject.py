@@ -336,6 +336,27 @@ class ttObject:
 
     @staticmethod
     def ttDot(tt1, tt2) -> float():
+        """
+        Computes the dot product of two tensors in TT format.
+
+        Parameters
+        ----------
+        tt1:obj:`ttObject`
+            Tensor in TT-format
+        tt2:obj:`ttObject`
+            Tensor in TT-format
+
+        Returns
+        -------
+        prod:obj:`float`
+            Dot product of `tt1` and `tt2`.
+
+        Raises
+        ------
+        AttributeError
+            When either one of the input parameters are not `ttObject`s.
+
+        """
         if not isinstance(tt1, ttObject) or not isinstance(tt2, ttObject):
             if isinstance(tt1, list):
                 tt1 = ttObject(tt1)
