@@ -383,6 +383,24 @@ class ttObject:
 
     @staticmethod
     def ttNorm(tt1) -> float:
+        """
+        Computes norm of a tensor in TT-format.
+
+        Parameters
+        ----------
+        tt1:obj:`ttObject`
+            Tensor in TT-format
+
+        Returns
+        -------
+        norm:obj:`float`
+            Norm of `tt1`.
+
+        Raises
+        ------
+        AttributeError
+            When the input parameter is not a `ttObject`.
+        """
         if not isinstance(tt1, ttObject):
             if isinstance(tt1, list):
                 tt1 = ttObject(tt1)
