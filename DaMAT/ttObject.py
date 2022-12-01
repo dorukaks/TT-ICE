@@ -120,7 +120,7 @@ class ttObject:
 
         if self.inputType == np.ndarray:
             self.ttEpsilon = epsilon
-            self.originalShape = data.shape
+            self.originalShape = list(data.shape)
             self.reshapedShape = self.originalShape
             self.indexOrder = [idx for idx in range(len(self.originalShape))]
         elif self.inputType == list:
