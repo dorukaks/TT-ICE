@@ -203,7 +203,9 @@ class ttObject:
 
     def computeTranspose(self, newOrder: list) -> None:
         """
-        Transposes the axes of `originalData`. Similar to `changeShape`, a simple
+        Transposes the axes of `originalData`.
+
+        Similar to `changeShape`, a simple
         `numpy.transpose` would be sufficient for this purpose but in order to
         keep track of the transposition order `indexOrder` attribute also needs
         to be updated accordingly.
