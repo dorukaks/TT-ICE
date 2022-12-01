@@ -2,7 +2,7 @@ import os
 import time
 
 import numpy as np
-import python.src.DaMAT as dmt
+import DaMAT as dmt
 
 from PIL import Image
 
@@ -42,13 +42,15 @@ for _ in range(initialize):
     startRuns.append(run)
 if game == "MsPacman":
     imgDir = (
-        "/home/dorukaks/Desktop/GameDataProject"
+        # "/home/dorukaks/Desktop/GameDataProject"
+        "/home/doruk/gameDataProject"
         + f"/{game}NoFrameskip-v4/training/full_image_all_lives/\
             {game}NoFrameskip-v4-recorded_images-"
     )
 else:
     imgDir = (
-        "/home/dorukaks/Desktop/GameDataProject"
+        # "/home/dorukaks/Desktop/GameDataProject"
+        "/home/doruk/gameDataProject"
         + f"/{game}NoFrameskip-v4/{game}NoFrameskip-v4-recorded_images-"
     )
 
@@ -88,13 +90,15 @@ while runIndices:
     numIms = np.zeros(increment)
     if game == "MsPacman":
         imgDir = (
-            "/home/dorukaks/Desktop/GameDataProject"
+            # "/home/dorukaks/Desktop/GameDataProject"
+            "/home/doruk/gameDataProject"
             + f"/{game}NoFrameskip-v4/training/full_image_all_lives/\
                 {game}NoFrameskip-v4-recorded_images-"
         )
     else:
         imgDir = (
-            "/home/dorukaks/Desktop/GameDataProject"
+            # "/home/dorukaks/Desktop/GameDataProject"
+            "/home/doruk/gameDataProject"
             + f"/{game}NoFrameskip-v4/{game}NoFrameskip-v4-recorded_images-"
         )
     indexes = []
