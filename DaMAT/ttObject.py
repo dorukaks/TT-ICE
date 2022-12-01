@@ -225,6 +225,7 @@ class ttObject:
             )
         self.indexOrder = [self.indexOrder[idx] for idx in newOrder]
         self.originalData = self.originalData.transpose(newOrder)
+        self.reshapedShape = list(self.originalData.shape)
 
     def indexMap(self) -> None:
         """
