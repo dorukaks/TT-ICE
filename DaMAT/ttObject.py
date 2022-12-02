@@ -696,9 +696,6 @@ class ttObject:
             self.ttCores[coreIdx].shape[0], -1, 1
         )
         self.updateRanks()
-        # self.ttRanks=[1]
-        # for core in self.ttCores:
-        #     self.ttRanks.append(core.shape[-1])
         return None
 
     def ttICEstar(
