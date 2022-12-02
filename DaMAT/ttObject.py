@@ -492,9 +492,10 @@ class ttObject:
             projectedData = np.tensordot(core, projectedData, axes=(-1, 0))
         return projectedData
 
-    def updateRanks(
-        self,
-    ) -> None:  # function to update the ranks of the ttobject after incremental updates
+    def updateRanks(self) -> None:
+        """
+        Updates the ranks of the `ttObject` after incremental updates.
+        """
         self.ttRanks = [1]
         for core in self.ttCores:
             self.ttRanks.append(core.shape[-1])
