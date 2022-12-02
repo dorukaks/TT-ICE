@@ -418,7 +418,7 @@ class ttObject:
         Projects tensors onto basis spanned by TT-cores.
 
         Given a tensor with appropriate dimensions, this function leverages
-        the fact that TT-cores obtained through `TSVD`_ and `TT-ICE`_ are
+        the fact that TT-cores obtained through `TTSVD`_ and `TT-ICE`_ are
         column-orthonormal in the mode-2 unfolding.
 
         Note
@@ -437,11 +437,11 @@ class ttObject:
             indexing.
 
          .. _TTSVD:
-        https://epubs.siam.org/doi/epdf/10.1137/090752286
-        _TT-ICE:
-        https://arxiv.org/abs/2211.12487
-        _TT-ICE*:
-        https://arxiv.org/abs/2211.12487
+            https://epubs.siam.org/doi/epdf/10.1137/090752286
+            _TT-ICE:
+            https://arxiv.org/abs/2211.12487
+            _TT-ICE*:
+            https://arxiv.org/abs/2211.12487
         """
         for coreIdx, core in enumerate(self.ttCores):
             if (coreIdx == len(self.ttCores) - 1) or coreIdx == upTo:
