@@ -51,6 +51,8 @@ class ttObject:
         Desired relative error upper bound.
     ttCores: :obj:`list` of :obj:`numpy.array`
         Cores of the TT-decomposition. Stored as a list of numpy arrays.
+    ttRanks: :obj:`list` of :obj:`int`
+        TT-ranks of the decomposition. Stored as a list of integers.
     nCores: :obj:`int`
         Number of TT-cores in the decomposition.
     nElements: :obj:`int`
