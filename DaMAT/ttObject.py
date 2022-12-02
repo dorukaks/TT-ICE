@@ -551,6 +551,9 @@ class ttObject:
         """
         Computes TT-decomposition of a multidimensional array using `TTSVD`_ algorithm.
 
+        Currently only supports `ttsvd` as method. In the future additional formats may
+        be covered.
+
         Parameters
         ----------
         norm:obj:`float`
@@ -574,8 +577,6 @@ class ttObject:
         .. _TTSVD:
             https://epubs.siam.org/doi/epdf/10.1137/090752286
         """
-        # tt decomposition to initialize the cores, will support ttsvd for now
-        # but will be open to other computation methods
         if norm is None:
             norm = np.linalg.norm(self.originalData)
         if self.method == "ttsvd":
