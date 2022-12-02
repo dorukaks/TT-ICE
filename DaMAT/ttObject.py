@@ -479,9 +479,9 @@ class ttObject:
             (not including) the core that has index `upTo`. Assumes 1-based
             indexing.
         .. _TTSVD:
-        https://epubs.siam.org/doi/epdf/10.1137/090752286
-        _TT-ICE:
-        https://arxiv.org/abs/2211.12487
+            https://epubs.siam.org/doi/epdf/10.1137/090752286
+            _TT-ICE:
+            https://arxiv.org/abs/2211.12487
 
         """
         if upTo is None:
