@@ -595,9 +595,38 @@ class ttObject:
         else:
             raise ValueError("Method unknown. Please select a valid method!")
 
-    def ttICE(
-        self, newTensor, epsilon=None, tenNorm=None
-    ) -> None:  # TT-ICE algorithmn without heuristics
+    def ttICE(self, newTensor, epsilon=None, tenNorm=None) -> None:
+        """
+        `TT-ICE`_ algorithmn without any heuristic upgrades.
+
+        Given a set of TT-cores, this function provides incremental updates
+        to the TT-cores to approximate `newTensor` within a relative error
+        defined in `epsilon`
+
+        Note
+        ----
+        This algorithm/function relies on the fact that TT-cores are columnwise
+        orthonormal in the mode-2 unfolding.
+
+        Parameters
+        ----------
+        newTensor:obj:`np.array`
+            New/streamed tensor that will be used to expand the orthonormal bases defined
+            in TT-cores
+        epsilon:obj:`float`, optional
+            Relative error upper bound for approximating `newTensor` after incremental
+            updates. If not defined, `ttObject.ttEpsilon` is used.
+        tenNorm:obj:`float`, optional
+            Norm of `newTensor`
+
+        The following attributes are modified as a result of this function:
+        -------
+        - `ttObject.ttCores`
+        - `ttObject.ttRanks`
+        - `ttObject.compressionRatio`
+        .. _TT-ICE:
+            https://arxiv.org/abs/2211.12487
+        """
         if tenNorm is None:
             tenNorm = np.linalg.norm(newTensor)
         if epsilon is None:
