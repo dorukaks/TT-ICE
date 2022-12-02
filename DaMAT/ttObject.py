@@ -538,9 +538,12 @@ class ttObject:
         relError = differenceNorm / elementwiseNorm
         return relError
 
-    def computeRecError(
-        self, data: np.array, start=None, finish=None
-    ) -> None:  # computes relative error by reconstructing data
+    def computeRecError(self, data: np.array, start=None, finish=None) -> None:
+        """
+        Function to compute relative error by reconstructing data from slices
+        of TT-cores.
+        Currently not implemented.
+        """
         self.A = 2
 
     # List of methods that will compute a decomposition
