@@ -505,13 +505,13 @@ class ttObject:
         self, data: np.array
     ) -> np.array:  # computes relative error by projecting data
         elementwiseNorm = np.linalg.norm(data, axis=0)
-        for idx in range(len(data.shape) - 2):
+        for _ in range(len(data.shape) - 2):
             elementwiseNorm = np.linalg.norm(elementwiseNorm, axis=0)
         projectedData = self.projectTensor(data)
         reconstructedData = self.reconstruct(projectedData).reshape(data.shape)
         difference = data - reconstructedData
         differenceNorm = np.linalg.norm(difference, axis=0)
-        for idx in range(len(difference.shape) - 2):
+        for _ in range(len(difference.shape) - 2):
             differenceNorm = np.linalg.norm(differenceNorm, axis=0)
         relError = differenceNorm / elementwiseNorm
         return relError
