@@ -565,11 +565,11 @@ class ttObject:
             When `method` is not one of the admissible methods.
 
 
-        The following attributes are modified as a result of this function
+        The following attributes are modified as a result of this function:
         -------
-        `ttObject.ttCores`
-        `ttObject.ttRanks`
-        `ttObject.compressionRatio`
+        - `ttObject.ttCores`
+        - `ttObject.ttRanks`
+        - `ttObject.compressionRatio`
 
         .. _TTSVD:
             https://epubs.siam.org/doi/epdf/10.1137/090752286
