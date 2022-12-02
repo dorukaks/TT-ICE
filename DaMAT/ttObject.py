@@ -619,6 +619,7 @@ class ttObject:
         tenNorm:obj:`float`, optional
             Norm of `newTensor`
 
+
         The following attributes are modified as a result of this function:
         -------
         - `ttObject.ttCores`
