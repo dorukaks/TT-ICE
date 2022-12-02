@@ -501,15 +501,37 @@ class ttObject:
             self.ttRanks.append(core.shape[-1])
         return None
 
-    def computeRelError(
-        self, data: np.array
-    ) -> np.array:  # computes relative error by projecting data
-        elementwiseNorm = np.linalg.norm(data, axis=0)
-        for _ in range(len(data.shape) - 2):
+    def computeRelError(self, newTensor: np.array) -> np.array:
+        """
+        Computes relative error by projecting data onto TT-cores.
+
+        This function computes the error induced by projecting `data` onto the TT-cores
+        of `ttObject`. The last index of `newTensor` is assumed to be the number of
+        individual observations.
+
+        Note
+        ----
+        - In order to compute the projection onto the TT-cores, the dimensions of `data`
+        should match that of `ttObject`.
+        - If a single observation will be passed as `newTensor`, an additional
+        index/dimension should be introduced either through reshaping or [:,None]
+
+        Parameters
+        ----------
+        newTensor:obj:`np.array`
+            Tensor for which the projection error is computed
+
+        Returns
+        -------
+        relError:obj:`np.array`
+            Array of relative errors
+        """
+        elementwiseNorm = np.linalg.norm(newTensor, axis=0)
+        for _ in range(len(newTensor.shape) - 2):
             elementwiseNorm = np.linalg.norm(elementwiseNorm, axis=0)
-        projectedData = self.projectTensor(data)
-        reconstructedData = self.reconstruct(projectedData).reshape(data.shape)
-        difference = data - reconstructedData
+        projectedData = self.projectTensor(newTensor)
+        reconstructedData = self.reconstruct(projectedData).reshape(newTensor.shape)
+        difference = newTensor - reconstructedData
         differenceNorm = np.linalg.norm(difference, axis=0)
         for _ in range(len(difference.shape) - 2):
             differenceNorm = np.linalg.norm(differenceNorm, axis=0)
