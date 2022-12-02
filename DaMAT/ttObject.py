@@ -454,6 +454,38 @@ class ttObject:
         return newData
 
     def reconstruct(self, projectedData, upTo=None):
+        """
+        Reconstructs tensors using TT-cores.
+
+        Assumes that `projectedData` is a slice from the last
+        TT-core.
+        While reconstructing any projected tensor from  `projectTensor`,
+        this function leverages the fact that TT-cores obtained through
+        `TSVD`_ and `TT-ICE`_ are column-orthonormal in the mode-2
+        unfolding.
+
+        Note
+        ----
+        This function might not yield correct results for projected tensors
+        if the TT-cores are not comprised of orthogonal vectors.
+
+        Parameters
+        ----------
+        projectedData:obj:`np.aray`
+            A tensor slice (or alternatively an array)
+        upTo:obj:`int`,optional
+            Index that the reconstruction will be terminated. If an integer is
+            passed as this parameter, `projectedData` will be projected up to
+            (not including) the core that has index `upTo`. Assumes 1-based
+            indexing.
+
+        .. _TTSVD:
+        https://epubs.siam.org/doi/epdf/10.1137/090752286
+        _TT-ICE:
+        https://arxiv.org/abs/2211.12487
+        _TT-ICE*:
+        https://arxiv.org/abs/2211.12487
+        """
         if upTo is None:
             upTo = len(self.ttCores) - 1  # Write the core index in 1-indexed form!!
         for core in self.ttCores[:upTo][::-1]:
