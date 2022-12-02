@@ -282,6 +282,12 @@ class ttObject:
                         header=f"{core.shape[0]} {core.shape[1]} {core.shape[2]}",
                         delimiter=" ",
                     )
+            elif outputType == "npy":
+                for coreIdx, core in enumerate(self.ttCores):
+                    np.save(
+                        directory + f"{fileName}_{coreIdx}.npy",
+                        core,
+                    )
             else:
                 raise ValueError(f"Output type {outputType} is not supported!")
         else:
