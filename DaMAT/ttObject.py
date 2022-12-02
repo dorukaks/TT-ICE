@@ -433,7 +433,8 @@ class ttObject:
         upTo:obj:`int`,optional
             Index that the projection will be terminated. If an integer is
             passed as this parameter, `newTensor` will be projected up to
-            (not including) the core that has index `upTo`.
+            (not including) the core that has index `upTo`. Assumes 1-based
+            indexing.
 
          .. _TTSVD:
         https://epubs.siam.org/doi/epdf/10.1137/090752286
