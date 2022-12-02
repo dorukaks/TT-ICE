@@ -478,13 +478,11 @@ class ttObject:
             passed as this parameter, `projectedData` will be projected up to
             (not including) the core that has index `upTo`. Assumes 1-based
             indexing.
-
         .. _TTSVD:
         https://epubs.siam.org/doi/epdf/10.1137/090752286
         _TT-ICE:
         https://arxiv.org/abs/2211.12487
-        _TT-ICE*:
-        https://arxiv.org/abs/2211.12487
+
         """
         if upTo is None:
             upTo = len(self.ttCores) - 1  # Write the core index in 1-indexed form!!
