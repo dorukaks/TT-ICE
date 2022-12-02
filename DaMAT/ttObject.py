@@ -461,7 +461,7 @@ class ttObject:
         TT-core.
         While reconstructing any projected tensor from  `projectTensor`,
         this function leverages the fact that TT-cores obtained through
-        `TSVD`_ and `TT-ICE`_ are column-orthonormal in the mode-2
+        `TTSVD`_ and `TT-ICE`_ are column-orthonormal in the mode-2
         unfolding.
 
         Note
