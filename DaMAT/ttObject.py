@@ -556,7 +556,7 @@ class ttObject:
 
         Parameters
         ----------
-        norm:obj:`float`
+        norm:obj:`float`, optional
             Norm of the tensor to be compressed
         dtype:obj:`type`, optional
             Desired data type for the compression. Intended to allow lower precision
