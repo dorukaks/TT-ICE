@@ -100,7 +100,7 @@ class ttObject:
         samplesAlongLastDimension: :obj:`bool`, optional
             Boolean variable to ensure if the samples are stacked along the last
             dimension. Assumed to be `True` since it is one of the assumptions in TT-ICE.
-        method: :obj:`str`,optional
+        method: :obj:`str`, optional
             Determines the computation method for tensor train decomposition of
             the multidimensional array presented as `data`. Set to `'ttsvd'` by default.
 
@@ -432,7 +432,7 @@ class ttObject:
         ----------
         newData:obj:`np.aray`
             Tensor to be projected
-        upTo:obj:`int`,optional
+        upTo:obj:`int`, optional
             Index that the projection will be terminated. If an integer is
             passed as this parameter, `newTensor` will be projected up to
             (not including) the core that has index `upTo`. Assumes 1-based
@@ -475,7 +475,7 @@ class ttObject:
         ----------
         projectedData:obj:`np.aray`
             A tensor slice (or alternatively an array)
-        upTo:obj:`int`,optional
+        upTo:obj:`int`, optional
             Index that the reconstruction will be terminated. If an integer is
             passed as this parameter, `projectedData` will be projected up to
             (not including) the core that has index `upTo`. Assumes 1-based
