@@ -415,7 +415,7 @@ class ttObject:
 
     def projectTensor(self, newData: np.array, upTo=None) -> np.array:
         """
-        Projects tensors onto basis spanned by TT-cores
+        Projects tensors onto basis spanned by TT-cores.
 
         Given a tensor with appropriate dimensions, this function leverages
         the fact that TT-cores obtained through `TSVD`_ and `TT-ICE`_ are
