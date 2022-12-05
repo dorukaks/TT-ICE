@@ -736,17 +736,18 @@ class ttObject:
             Relative error upper bound for approximating `newTensor` after incremental
             updates. If not defined, `ttObject.ttEpsilon` is used.
         tenNorm:obj:`float`, optional
-            Norm of `newTensor`
+            Norm of `newTensor`.
         elementwiseNorm:obj:`np.array`, optional
-
+            Individual norms of the observations in `newTensor`.
         elementwiseEpsilon:obj:`np.array`, optional
+            Individual relative projection errors of the observations in `newTensor`.
         heuristicsToUse:obj:`list`, optional
         occupancyThreshold:obj:`float`, optional
         simpleEpsilonUpdate:obj:`bool`, optional
 
-
-        The following attributes are modified as a result of this function:
+        Notes
         -------
+        **The following attributes are modified as a result of this function:**
         - `ttObject.ttCores`
         - `ttObject.ttRanks`
         - `ttObject.compressionRatio`
