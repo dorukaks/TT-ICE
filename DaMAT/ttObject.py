@@ -744,8 +744,14 @@ class ttObject:
         elementwiseEpsilon:obj:`np.array`, optional
             Individual relative projection errors of the observations in `newTensor`.
         heuristicsToUse:obj:`list`, optional
+            List of heuristics to use while updating TT-cores. Currently only accepts
+            `'skip'`, `'subselect'`, and `'occupancy'`.
         occupancyThreshold:obj:`float`, optional
+            Threshold determining whether to skip updating a single core or not. Not used
+            if `'occupancy'` is not in `heuristicsToUse`
         simpleEpsilonUpdate:obj:`bool`, optional
+            Uses the simple epsilon update equation. *Warning*: this relies on the
+            assumption that all observations in `newTensor` have similar norms.
 
         Notes
         -------
