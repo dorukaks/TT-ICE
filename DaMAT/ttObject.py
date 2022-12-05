@@ -626,10 +626,12 @@ class ttObject:
             Norm of `newTensor`
 
 
-        >**The following attributes are modified as a result of this function:**
-        >- `ttObject.ttCores`
-        >- `ttObject.ttRanks`
-        >- `ttObject.compressionRatio`
+        Notes
+        -------
+        **The following attributes are modified as a result of this function:**
+        - `ttObject.ttCores`
+        - `ttObject.ttRanks`
+        - `ttObject.compressionRatio`
         .. _TT-ICE:
             https://arxiv.org/abs/2211.12487
         """
