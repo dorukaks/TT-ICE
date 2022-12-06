@@ -133,7 +133,7 @@ class ttObject:
             raise TypeError("Unknown input type!")
 
     @property
-    def coreOccupancy(self) -> None:  # function to return core occupancy
+    def coreOccupancy(self) -> None:
         """
         :obj:`list` of :obj:`float`: A metric showing the *relative rank* of each
         TT-core. This metric is used for a heuristic enhancement tool in `TT-ICE*`
@@ -194,13 +194,11 @@ class ttObject:
             return None
         self.reshapedShape = newShape
         self.originalData = np.reshape(self.originalData, self.reshapedShape)
-        self.reshapedShape = list(
-            self.originalData.shape
-        )  # changed this to a list for the trick in ttICEstar
+        self.reshapedShape = list(self.originalData.shape)
+        # Changed reshapedShape to a list for the trick in ttICEstar
         if self.samplesAlongLastDimension:
-            self.singleDataShape = self.reshapedShape[
-                :-1
-            ]  # This line assumes we keep the last index as the samples index and don't
+            self.singleDataShape = self.reshapedShape[:-1]
+            # This line assumes we keep the last index as the samples index and don't
             # interfere with its shape
 
     def computeTranspose(self, newOrder: list) -> None:
@@ -552,7 +550,6 @@ class ttObject:
         """
         self.A = 2
 
-    # List of methods that will compute a decomposition
     def ttDecomp(self, norm=None, dtype=np.float32) -> "ttObject.ttCores":
         """
         Computes TT-decomposition of a multidimensional array using `TTSVD`_ algorithm.
@@ -625,7 +622,6 @@ class ttObject:
         tenNorm:obj:`float`, optional
             Norm of `newTensor`
 
-
         Notes
         -------
         **The following attributes are modified as a result of this function:**
@@ -642,9 +638,6 @@ class ttObject:
         newTensorSize = len(newTensor.shape) - 1
         newTensor = newTensor.reshape(list(self.reshapedShape[:-1]) + [-1])[None, :]
         newTensor = newTensor.reshape(self.reshapedShape[0], -1)
-        # newTensor=newTensor.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:]
-        # # if line above does not work, use this one instead
-        # Test the code, not sure if this actually works
         Ui = self.ttCores[0].reshape(self.reshapedShape[0], -1)
         Ri = newTensor - Ui @ (Ui.T @ newTensor)
         for coreIdx in range(0, len(self.ttCores) - 2):
@@ -665,7 +658,6 @@ class ttObject:
                 ),
                 axis=0,
             )
-            # Need to check these following three lines
             Ui = self.ttCores[coreIdx].reshape(
                 self.ttCores[coreIdx].shape[0] * self.reshapedShape[coreIdx], -1
             )
@@ -678,9 +670,7 @@ class ttObject:
             Ri = newTensor - Ui @ (Ui.T @ newTensor)
         coreIdx = len(self.ttCores) - 2
         URi, _, _ = deltaSVD(Ri, tenNorm, newTensorSize, epsilon)
-        self.ttCores[coreIdx] = np.hstack(
-            (Ui, URi)
-        )  # .reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
+        self.ttCores[coreIdx] = np.hstack((Ui, URi))
         self.ttCores[coreIdx + 1] = np.concatenate(
             (
                 self.ttCores[coreIdx + 1],
@@ -803,48 +793,30 @@ class ttObject:
                     for _ in range(len(self.ttCores) - 1):
                         elementwiseNorm = np.linalg.norm(elementwiseNorm, axis=0)
                 allowedError = (self.ttEpsilon * np.linalg.norm(elementwiseNorm)) ** 2
-                # discardedEpsilon=np.sum((elementwiseEpsilon[discard]*elementwiseNorm[discard])**2)/np.sum(np.linalg.norm(elementwiseNorm[discard])**2)
-                # discardedError=discardedEpsilon*(np.linalg.norm(elementwiseNorm[discard])**2)
                 discardedError = np.sum(
                     (elementwiseEpsilon[discard] * elementwiseNorm[discard]) ** 2
-                )  # uncomment above two lines if this breaks something
+                )
                 updEpsilon = np.sqrt(
                     (allowedError - discardedError)
                     / (np.linalg.norm(elementwiseNorm[select]) ** 2)
                 )
-        # print(updEpsilon)
-        # self.reshapedShape[-1]=newTensor.shape[-1]
         self.reshapedShape[-1] = np.array(
             select
         ).sum()  # a little trick for ease of coding
 
         indexString = "["
-        for _ in range(
-            len(self.reshapedShape)
-        ):  # this heuristic assumes that the last dimension is for observations
+        for _ in range(len(self.reshapedShape)):
+            # this heuristic assumes that the last dimension is for observations
             indexString += ":,"
         selectString = indexString + "select]"
-
-        # discardString=indexString+"discard]"
         selected = eval("newTensor" + selectString)
-        # discarded=eval('newTensor'+indexString)
-        # #looks unnecessary, might get rid of this line#
 
         selected = selected.reshape(list(self.reshapedShape[:-1]) + [-1])[None, :]
-        # # if line above does not work, use this one instead
-        # selected=selected.reshape(tuple(list(self.reshapedShape[:-1])+[-1]))[None,:]
-
-        # Test the code, not sure if this actually works
-
-        # Ui=self.ttCores[0].reshape(self.reshapedShape[0],-1)
         for coreIdx in range(0, len(self.ttCores) - 1):
             selected = selected.reshape(np.prod(self.ttCores[coreIdx].shape[:-1]), -1)
             if ("occupancy" in heuristicsToUse) and (
                 self.coreOccupancy[coreIdx] >= occupancyThreshold
             ):
-                # It seems like you don't need to do anything else here,
-                # but check and make sure!
-                # continue
                 pass
             else:
                 Ui = self.ttCores[coreIdx].reshape(
@@ -863,7 +835,6 @@ class ttObject:
                         updEpsilon,
                     )
                 self.ttCores[coreIdx] = np.hstack((Ui, URi))
-                # .reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
                 self.ttCores[coreIdx + 1] = np.concatenate(
                     (
                         self.ttCores[coreIdx + 1],
@@ -881,43 +852,25 @@ class ttObject:
             self.ttCores[coreIdx] = self.ttCores[coreIdx].reshape(
                 np.prod(self.ttCores[coreIdx].shape[:-1]), -1
             )
-
-            # selected=(self.ttCores[coreIdx].T@selected).reshape(np.prod(self.ttCores[coreIdx+1].shape[:-1]),-1)
             # #project onto existing core and reshape for next core
             selected = (self.ttCores[coreIdx].T @ selected).reshape(
                 self.ttCores[coreIdx + 1].shape[0] * self.reshapedShape[coreIdx + 1], -1
-            )  # project onto existing core and reshape for next core
-
-            # selected=(self.ttCores[coreIdx].T@selected).reshape(self.ttRanks[coreIdx+1]*self.reshapedShape[coreIdx+1],-1)
-            # #project onto existing core and reshape for next core
+            )
+            # fold back the previous core
             self.ttCores[coreIdx] = self.ttCores[coreIdx].reshape(
                 -1, self.reshapedShape[coreIdx], self.ttCores[coreIdx].shape[-1]
-            )  # fold back the previous core
+            )
             # self.ttCores[coreIdx]=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
             # #fold back the previous core
         self.updateRanks()
-        coreIdx += 1  # coreIdx=len(self.ttCores), i.e working on the last core
+        coreIdx += 1
+        # coreIdx=len(self.ttCores), i.e working on the last core
         self.ttCores[coreIdx] = self.ttCores[coreIdx].reshape(
             self.ttCores[coreIdx].shape[0], -1
         )
         self.ttCores[coreIdx] = np.hstack(
             (self.ttCores[coreIdx], self.projectTensor(newTensor))
         ).reshape(self.ttCores[coreIdx].shape[0], -1, 1)
-
-        # # Need to check these following three lines
-        # Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
-        # newTensor=Ui.T@newTensor
-        # Ri=newTensor-Ui@(Ui.T@newTensor)
-
-        # coreIdx=len(self.ttCores)-2
-        # URi,_,_=deltaSVD(Ri,tenNorm,newTensorSize,epsilon)
-        # self.ttCores[coreIdx]=np.hstack((Ui,URi)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
-        # self.ttCores[coreIdx+1]=np.concatenate((self.ttCores[coreIdx+1],np.zeros((URi.shape[-1],self.reshapedShape[coreIdx+1],self.ttRanks[coreIdx+2]))),axis=0)
-        # newTensor=Ui.T@newTensor
-        # coreIdx+=1
-        # Ui=self.ttCores[coreIdx].reshape(self.ttCores[coreIdx].shape[0]*self.reshapedShape[coreIdx],-1)
-        # self.ttCores[coreIdx]=np.hstack((Ui,newTensor)).reshape(self.ttCores[coreIdx].shape[0],self.reshapedShape[coreIdx],-1)
-        # self.updateRanks()
         return None
 
     def ttRound(self, norm, epsilon=0) -> None:
@@ -954,17 +907,16 @@ class ttObject:
         d = [core.shape[1] for core in self.ttCores]
         for coreIdx in np.arange(len(self.ttCores))[::-1]:
             currCore = self.ttCores[coreIdx]
-            currCore = currCore.reshape(
-                currCore.shape[0], -1
-            )  # Compute mode 1 unfolding of the tt-core
-            q, r = np.linalg.qr(
-                currCore.T
-            )  # Using the transpose results in a row orthogonal Q matrix !!!
+            # Compute mode 1 unfolding of the tt-core
+            currCore = currCore.reshape(currCore.shape[0], -1)
+            # Using the transpose results in a row orthogonal Q matrix !!!
+            q, r = np.linalg.qr(currCore.T)
             q, r = q.T, r.T
             self.ttCores[coreIdx] = q
+            # Contract previous tt-core and R matrix
             self.ttCores[coreIdx - 1] = np.tensordot(
                 self.ttCores[coreIdx - 1], r, axes=(-1, 0)
-            )  # contract previous tt-core and R matrix
+            )
             if coreIdx == 1:
                 break
                 # pass #TODO: write the case for the last core here.
@@ -977,9 +929,10 @@ class ttObject:
                 core, norm, len(self.ttCores), epsilon
             )
             ranks.append(self.ttCores[coreIdx].shape[-1])
+            # fold matrices into tt-cores
             self.ttCores[coreIdx] = self.ttCores[coreIdx].reshape(
                 ranks[coreIdx], d[coreIdx], -1
-            )  # fold matrices into tt-cores
+            )
             self.ttCores[coreIdx + 1] = (
                 (np.diag(sigma) @ v) @ self.ttCores[coreIdx + 1]
             ).reshape(ranks[-1] * d[coreIdx + 1], -1)
@@ -1044,7 +997,7 @@ class ttObject:
         tt2.ttCores[-1] = np.concatenate(
             (np.zeros((rank2, numObs1)), tt2.ttCores[-1]), axis=1
         )
-        # Addition in tt-format #
+        # Addition in TT-format #
         for coreIdx in range(len(tt1.ttCores)):
             if coreIdx == 0:
                 tt1.ttCores[coreIdx] = np.concatenate(
@@ -1052,7 +1005,6 @@ class ttObject:
                     axis=1,
                 )[None, :, :]
             elif coreIdx == len(tt1.ttCores) - 1:
-                # tt1.ttCores[coreIdx]=np.concatenate((tt1.ttCores[coreIdx].squeeze(-1),tt2.ttCores[coreIdx].squeeze(-1)),axis=0)[:,:,None]
                 tt1.ttCores[coreIdx] = np.concatenate(
                     (tt1.ttCores[coreIdx], tt2.ttCores[coreIdx]), axis=0
                 )[:, :, None]
