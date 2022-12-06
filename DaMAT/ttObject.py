@@ -920,9 +920,37 @@ class ttObject:
         # self.updateRanks()
         return None
 
-    def ttRound(
-        self, norm, epsilon=0
-    ) -> None:  # tt rounding as per oseledets 2011 -> Might be implemented as a utility
+    def ttRound(self, norm, epsilon=0) -> None:
+        """
+        Reorthogonalizes and recompresses TT-cores as per `Oseledets 2011`_.
+
+        This is the TT-rounding algorithm described in `TTSVD`_ paper. This
+        function first reorthogonalizes the cores from last to first using
+        QR decomposition and then recompresses the reorthogonalized TT-cores
+        from first to last using `TTSVD`_ algorithm.
+
+        Parameters
+        ----------
+        norm:obj:`float`
+            Norm of the TT-approximation. If there is no information on the
+            uncompressed tensor, `ttNorm` function can be used.
+        epsilon:obj:`float`, optional
+            Relative error upper bound for the recompression step. Note that
+            this relative error upper bound is not with respect to the original
+            tensor but to the `compressed` tensor. Set to 0 by default.
+
+        Notes
+        -----
+        **The following attributes are modified as a result of this function:**
+        - `ttObject.ttCores`
+        - `ttObject.ttRanks`
+        - `ttObject.compressionRatio`
+
+        .. _Oseledets 2011:
+            https://epubs.siam.org/doi/epdf/10.1137/090752286
+            TTSVD:
+            https://epubs.siam.org/doi/epdf/10.1137/090752286
+        """
         d = [core.shape[1] for core in self.ttCores]
         for coreIdx in np.arange(len(self.ttCores))[::-1]:
             currCore = self.ttCores[coreIdx]
