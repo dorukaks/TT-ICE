@@ -2,9 +2,6 @@
 
 import numpy as np
 
-# import dask.array as da
-# from datetime import datetime
-
 
 def primes(n):
     # function for finding prime factors for a given number,
@@ -70,7 +67,6 @@ def deltaSVD(data, dataNorm, dimensions, eps=0.1):
 
     # TODO: input checking
 
-    # perform delta-truncated svd similar to that of the ttsvd algorithm
     delta = (eps / ((dimensions - 1) ** (0.5))) * dataNorm
     try:
         u, s, v = np.linalg.svd(data, False, True)
