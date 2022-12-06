@@ -990,9 +990,43 @@ class ttObject:
         return None
 
     @staticmethod
-    def ittd(
-        tt1, tt2, rounding=True, epsilon=0
-    ) -> "ttObject":  # ittd method from liu2018 for comparison
+    def ittd(tt1, tt2, rounding=True, epsilon=0) -> "ttObject":
+        """
+        Alternative incremental tensor decomposition algorithm used to benchmark.
+
+        Note
+        ----
+        This method is empirically shown to be inferior to `TT-ICE`_ and
+        `TT-ICE*`_.
+
+        Parameters
+        ----------
+        tt1:obj:`ttObject`
+            Tensor in TT-format.
+        tt2:obj:`ttObject`
+            Tensor in TT-format.
+        rounding:obj:`bool`, optional
+            Determines if `ttRounding` will be done to the incremented TT-core.
+            Note that for unbounded streams, rounding is essential. Otherwise
+            TT-ranks will grow unboundedly.
+        epsilon:obj:`float`, optional
+            Relative error upper bound for the recompression step. Note that
+            this relative error upper bound is not with respect to the original
+            tensor but to the `compressed` tensor. Set to 0 by default. Not used
+            if `rounding` is set to `False`.
+
+        Notes
+        -----
+        **The following attributes are modified as a result of this function:**
+        - `ttObject.ttCores`
+        - `ttObject.ttRanks`
+        - `ttObject.compressionRatio`
+
+        .. _TT-ICE:
+            https://arxiv.org/abs/2211.12487
+            _TT-ICE*:
+            https://arxiv.org/abs/2211.12487
+        """
         if not isinstance(tt1, ttObject) or not isinstance(tt2, ttObject):
             if isinstance(tt1, list):
                 tt1 = ttObject(tt1)
