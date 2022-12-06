@@ -32,4 +32,7 @@
 *.app
 
 # Additional file formats added by DA
-*.txt
+array*
+*/__pycache__/**
+compression.py
+compressionPipeline.py
