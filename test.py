@@ -131,9 +131,18 @@ while runIndices:
     # dataSet.ttICE(images,tenNorm=np.linalg.norm(imagesNorm))
     # print(f'ttICE completed in {round(time.time()-stTime,4)}s')
     # dataSet.ttICEstar(images,tenNorm=np.linalg.norm(imagesNorm),heuristicsToUse=heuristicsToUse,elementwiseNorm=imagesNorm)
+    # dataSet.ttICEstar(
+    #     images,
+    #     tenNorm=norm,
+    #     heuristicsToUse=heuristicsToUse,
+    #     elementwiseNorm=imagesNorm,
+    # )
     dataSet.ttICEstar(
-        images, tenNorm=norm, heuristicsToUse=heuristicsToUse, elementwiseNorm=imagesNorm
+        images,
+        tenNorm=norm,
+        heuristicsToUse=heuristicsToUse,
+        elementwiseNorm=imagesNorm,
+        simpleEpsilonUpdate=True,
     )
-    # dataSet.ttICEstar(images,tenNorm=norm,heuristicsToUse=heuristicsToUse,elementwiseNorm=imagesNorm,simpleEpsilonUpdate=True)
     print(f"ttICE* completed in {round(time.time()-stTime,4)}s")
     print(dataSet.ttRanks)
