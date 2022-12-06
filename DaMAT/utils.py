@@ -19,9 +19,21 @@ def primes(n):
 
 
 def coreContraction(cores):
+    """
+    Converts TT-cores to full size tensors.
+
+    Parameters
+    ----------
+    cores:obj:`list` or iterable
+        A list of TT-cores.
+
+    Returns
+    -------
+    coreProd:obj:`np.ndarray`
+        Full tensor represented by the TT-cores.
+    """
     # TODO: input checking
 
-    # Function for converting tt-cores to full size tensors
     for coreIdx in range(len(cores) - 1):
         if coreIdx == 0:
             coreProd = np.tensordot(cores[coreIdx], cores[coreIdx + 1], axes=(-1, 0))
