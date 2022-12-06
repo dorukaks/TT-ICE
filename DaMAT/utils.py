@@ -4,18 +4,31 @@ import numpy as np
 
 
 def primes(n):
-    # function for finding prime factors for a given number,
-    # used for calculating the reshapings
-    primfac = []
+    """
+    Finds prime factors for a given number.
+
+    Used for calculating the reshapings.
+
+    Parameters
+    ----------
+    n:obj:`int`
+        Number to be factored out
+
+    Returns
+    -------
+    primFac:obj:`list`
+        List of prime factors
+    """
+    primFac = []
     d = 2
     while d * d <= n:
         while (n % d) == 0:
-            primfac.append(d)  # supposing you want multiple factors repeated
+            primFac.append(d)  # supposing you want multiple factors repeated
             n //= d
         d += 1
     if n > 1:
-        primfac.append(n)
-    return primfac
+        primFac.append(n)
+    return primFac
 
 
 def coreContraction(cores):
