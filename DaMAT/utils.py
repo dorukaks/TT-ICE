@@ -1,6 +1,7 @@
 """ This file contains the utility functions for running TT-ICE pack"""
 
 import numpy as np
+import cupy as cp
 
 
 def primes(n):
@@ -100,6 +101,28 @@ def deltaSVD(data, dataNorm, dimensions, eps=0.1):
         q, r = np.linalg.qr(data)
         u, s, v = np.linalg.svd(r)
         u = q @ u
+    slist = list(s * s)
+    slist.reverse()
+    truncpost = [
+        idx for idx, element in enumerate(np.cumsum(slist)) if element <= delta**2
+    ]
+    truncationRank = len(s) - len(truncpost)
+    return u[:, :truncationRank], s[:truncationRank], v[:truncationRank, :]
+
+
+def deltaSVDCuPy(data, dataNorm, dimensions, eps=0.1):
+
+    # TODO: input checking
+
+    delta = (eps / ((dimensions - 1) ** (0.5))) * dataNorm
+    try:
+        u, s, v = cp.linalg.svd(data, False, True)
+    except cp.linalg.LinAlgError:
+        print("CuPy svd did not converge, using qr+svd")
+        q, r = cp.linalg.qr(data)
+        u, s, v = cp.linalg.svd(r)
+        u = q @ u
+    s=cp.asnumpy(s)
     slist = list(s * s)
     slist.reverse()
     truncpost = [
