@@ -185,3 +185,36 @@ def ttsvd(data, dataNorm, eps=0.1, dtype=np.float32):
     ranks.append(1)
     cores.append(data.reshape(ranks[-2], inputShape[-1], ranks[-1], order="F"))
     return ranks, cores
+
+def ttsvdCuPy(data, dataNorm, eps=0.1, dtype=np.float32):
+    inputShape = data.shape
+    dimensions = len(data.shape)
+    if type(data) is not cp.ndarray:
+        data=cp.asarray(data)
+    delta = ((eps / ((dimensions - 1) ** (0.5))) * dataNorm).item()
+    ranks = [1]
+    cores = []
+    for k in range(dimensions - 1):
+        nk = inputShape[k]
+        data = data.reshape(
+            ranks[k] * nk, int(np.prod(data.shape) / (ranks[k] * nk)), order="F"
+        ).astype(dtype)
+        u, s, v = cp.linalg.svd(data, False, True)
+        # slist = list(s * s)
+        slist = (s * s).tolist()
+        slist.reverse()
+        truncpost = [
+            idx for idx, element in enumerate(np.cumsum(slist)) if element <= delta**2
+        ]
+        ranks.append(len(s) - len(truncpost))
+
+        u = u[:, : ranks[-1]]
+
+        cores.append(u.reshape(ranks[k], nk, ranks[k + 1], order="F"))
+        data = cp.zeros_like(v[: ranks[-1], :])
+        for idx, sigma in enumerate(s[: ranks[-1]]):
+            data[idx, :] = sigma * v[idx, :]
+
+    ranks.append(1)
+    cores.append(data.reshape(ranks[-2], inputShape[-1], ranks[-1], order="F"))
+    return ranks, cores
