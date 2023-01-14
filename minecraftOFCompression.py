@@ -5,26 +5,29 @@ import glob
 import cv2 as cv
 import numpy as np
 import DaMAT as dmt
+import cupy as cp
 
 cwd = os.getcwd()
-videoDir = "/media/dorukaks/Database/minecraftData/"
 videoDir = "/home/doruk/minecraftDataset/"
-saveDir = "/media/dorukaks/Database/minecraftCores/"
+videoDir = "/media/dorukaks/Database/minecraftData/"
 saveDir = "./"
+saveDir = "/media/dorukaks/Database/minecraftCores/"
 method = "ttsvd"
 heuristics = ["occupancy", "skip"]
 occThreshold = 1
 lines2Print = []
-epsilon = 0.1
+epsilon = 0.01
 spatialDS = 1
 tempDS = 1
 saveName = (
-    "minecraftCoresE"
+    "minecraftOFMetricsCPE"
+    # "minecraftOFCoresE"
     + "".join(str(epsilon).split("."))
     + f"sDS{spatialDS}tDS{tempDS}_f32"
 )
 compMetrFile = (
-    "minecraftMetricsE"
+    "minecraftOFMetricsCPE"
+    # "minecraftOFMetricsE"
     + "".join(str(epsilon).split("."))
     + f"sDS{spatialDS}tDS{tempDS}_f32.txt"
 )  # This file is for me
@@ -44,12 +47,17 @@ ret, frame = video.read()
 gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 flow = cv.calcOpticalFlowFarneback(prev_gray, gray, None, 0.75, 3, 120, 1, 5, 1.2, 0)
 
-dataSet = dmt.ttObject(
+# dataSet = dmt.ttObject(
+#     flow, epsilon=epsilon, keepData=False, samplesAlongLastDimension=True, method=method
+# )
+dataSet = dmt.ttObjectCP(
     flow, epsilon=epsilon, keepData=False, samplesAlongLastDimension=True, method=method
 )
 
 dataSet.changeShape(newShape=newShape)
-dataSet.ttDecomp(dtype=np.float32)
+dataSet.ttDecomp(dtype=cp.float32)
+# dataSet.ttDecomp(dtype=np.float32)
+# dataSet.ttDecomp()
 videoFrameCtr = 0
 frameCtr = 2
 videoCtr = 0
@@ -62,7 +70,8 @@ lines2Print.append(f"{dataSet.compressionRatio}")
 lines2Print.append(" ".join(map(str, dataSet.ttRanks)))
 lines2Print.append("\n")
 frameCtr = 1
-
+# for core in dataSet.ttCores:
+#     print(type(core))
 with open(compMetrFile, "a") as txt:
     txt.writelines(" ".join(lines2Print))
 lines2Print = []
@@ -77,7 +86,7 @@ totTime = dataSet.compressionTime
 prev_gray = gray
 # while(video.isOpened()):
 while ret:
-    print(frameCtr)
+    # print(frameCtr)
     # ret = a boolean return value from getting
     # the frame, frame = the current frame being
     # projected in the video
