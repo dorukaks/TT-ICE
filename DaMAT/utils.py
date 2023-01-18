@@ -56,7 +56,7 @@ def coreContraction(cores):
     return coreProd
 
 
-def deltaSVD(data, dataNorm, dimensions, eps=0.1):
+def deltaSVD(data, dataNorm, dimensions, eps=0.1, tuckerDelta=False):
     """
     Performs delta-truncated SVD similar to that of the `TTSVD`_ algorithm.
 
@@ -91,8 +91,10 @@ def deltaSVD(data, dataNorm, dimensions, eps=0.1):
     """
 
     # TODO: input checking
-
-    delta = (eps / ((dimensions - 1) ** (0.5))) * dataNorm
+    if tuckerDelta:
+        delta = (eps * dataNorm) / np.sqrt(2 * dimensions - 2)
+    else:
+        delta = (eps / ((dimensions - 1) ** (0.5))) * dataNorm
     try:
         u, s, v = np.linalg.svd(data, False, True)
     except np.linalg.LinAlgError:
