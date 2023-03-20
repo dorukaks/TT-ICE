@@ -15,7 +15,7 @@ import time
 import numpy as np
 
 from logging import warning
-from .utils import deltaSVD, ttsvd
+from .utils import deltaSVD, ttsvd, coreContraction, mode_n_unfolding
 from pickle import dump, load
 
 
@@ -1027,3 +1027,85 @@ class ttObject:
             tenNorm = ttObject.ttNorm(tt1)
             tt1.rounding(tenNorm, epsilon=epsilon)
         return tt1
+
+    @staticmethod
+    def ttfoa6d(data,ttRanks,ttCores=None,S=None,forgettingFactor=None):
+        nDims=len(data.shape)
+        dims=list(data.shape)
+        if forgettingFactor is None:
+            forgettingFactor=0.7
+
+        if len(ttRanks) != nDims:
+            raise ValueError("Number of dimensions do not match with number of TT-ranks")
+        
+        if ttCores is None:
+            # Initialize TT-cores randomly if no core is given.
+            ttCores=[]
+            ttCores.append(np.random.randn(1,dims[0],ttRanks[0]))
+            for dimIdx in range(1,nDims):
+                ttCores.append(np.random.randn(ttRanks[dimIdx-1],dims[dimIdx],ttRanks[dimIdx]))
+            ttCores[-1]=np.empty(ttRanks[-1],1)
+        if S is None:
+            # Initialize S matrices as identity matrices if no S is given from previous step.
+            S=[]
+            S.append(np.eye(ttRanks[0]))
+            for dimIdx in range(1,nDims):
+                S.append(np.eye(ttRanks[dimIdx-1]*ttRanks[dimIdx]))
+
+        # Update the last core G6
+        
+        Ht_1=coreContraction(ttCores[:-1])
+        # Ht_1=Ht_1.reshape(-1,ttRanks[-1])
+        Ht_1=mode_n_unfolding(Ht_1,6).T #this might be 5
+        g6=np.linalg.solve(Ht_1,data)
+        ttCores[-1]=np.hstack((ttCores[-1],g6))
+        recData=(Ht_1@g6).reshape(dims)
+        delta=data-recData
+
+        # Update G1
+        deltaunfold=mode_n_unfolding(delta,0)
+        Bk=coreContraction(ttCores[1:-1]+g6)
+        Wk=mode_n_unfolding(Bk,0)
+        S[0]=forgettingFactor*S[0]+Wk@Wk.T
+        Vk=np.linalg.solve(S[0],Wk)
+        ttCores[0]=ttCores[0]+deltaunfold@Vk.T
+
+        # Update G2
+        deltaunfold=mode_n_unfolding(delta,1)
+        Ak=mode_n_unfolding(ttCores[0],2).T
+        Bk=coreContraction(ttCores[2:-1]+g6)
+        Wk=np.kron(Bk,Ak)
+        S[1]=forgettingFactor=S[1]+Wk@Wk.T
+        Vk=np.linalg.solve(S[1],Wk)
+        ttCores[1]=ttCores[1]+deltaunfold@Vk.T
+
+        # Update G3
+        deltaunfold=mode_n_unfolding(delta,2)
+        Ak=mode_n_unfolding(coreContraction(ttCores[:2]),2)
+        Bk=coreContraction(ttCores[3:-1]+g6) #insert a mode 0 unfolding here if necessary
+        Wk=np.kron(Bk,Ak)
+        S[2]=forgettingFactor=S[2]+Wk@Wk.T
+        Vk=np.linalg.solve(S[2],Wk)
+        ttCores[2]=ttCores[2]+deltaunfold@Vk.T
+
+        # Update G4
+        deltaunfold=mode_n_unfolding(delta,3)
+        Ak=mode_n_unfolding(coreContraction(ttCores[:3]),3)
+        Bk=coreContraction(ttCores[4:-1]+g6) #insert a mode 0 unfolding here if necessary
+        Wk=np.kron(Bk,Ak)
+        S[3]=forgettingFactor=S[3]+Wk@Wk.T
+        Vk=np.linalg.solve(S[3],Wk)
+        ttCores[3]=ttCores[3]+deltaunfold@Vk.T
+
+        # Update G5
+        deltaunfold=mode_n_unfolding(delta,4)
+        Ak=mode_n_unfolding(coreContraction(ttCores[:4]),4)
+        # Bk=coreContraction(g6) #insert a mode 0 unfolding here if necessary
+        Wk=np.kron(g6,Ak)
+        S[4]=forgettingFactor=S[4]+Wk@Wk.T
+        Vk=np.linalg.solve(S[4],Wk)
+        ttCores[4]=ttCores[4]+deltaunfold@Vk.T
+
+
+
+        return S,ttCores
