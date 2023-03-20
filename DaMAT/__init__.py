@@ -9,3 +9,4 @@ In future releases, the coverage may be extended to other tensor decomposition f
 """
 
 from .ttObject import ttObject
+from .utils import *
