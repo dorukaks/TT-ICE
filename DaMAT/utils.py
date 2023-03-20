@@ -162,3 +162,13 @@ def ttsvd(data, dataNorm, eps=0.1, dtype=np.float32):
     ranks.append(1)
     cores.append(data.reshape(ranks[-2], inputShape[-1], ranks[-1], order="F"))
     return ranks, cores
+
+def mode_n_unfolding(tensor,mode):
+    # Computes mode-n unfolding/matricization of a tensor in the sense of Kolda&Bader
+    # Assumes the mode is given in 0 indexed format
+    nDims = len(tensor.shape)
+    dims = [dim for dim in range(nDims)]
+    modeIdx = dims.pop(mode)
+    dims=[modeIdx]+dims
+    tensor=tensor.transpose(dims)
+    return tensor.reshape(tensor.shape[0],-1,order='F')
