@@ -93,7 +93,8 @@ with open(dataLocation+'catgel_trainData0.cgf','rb') as gg:
 dataNorm=np.linalg.norm(prelimData)
 stepError=[]
 simNorm=[]
-curErr=[]
+cumErr=[]
+cumRelErr=[]
 simNorm.append(dataNorm)
 
 
@@ -102,6 +103,8 @@ S,ttCores=dmt.ttObject.ttfoa6d(prelimData,ttRanks,forgettingFactor=forgettingFac
 stepTime=time.time()-stepProbe
 print(f'Initial TT-FOA took {round(stepTime,4)} s')
 nCompressedSims+=1
+
+## Printing block ##
 lines2Print.append('ttFOA')
 lines2Print.append(f'{stepTime}') #Time to compute TT-FOA
 lines2Print.append(f'{dataNorm}') #Norm of the simulation
@@ -110,14 +113,78 @@ stepError.append(
 		dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][:,-1]) - prelimData
 		)
 	) #Norm of the error
+lines2Print.append(f'{stepError[-1]}') #Error of the current simulation
+lines2Print.append(f'{stepError[-1]/dataNorm}') #Relative error of the current simulation
 for idx in range(nCompressedSims):
 	origData=np.load(dataLocation+f'catgel_trainData{idx}.cgf')
-	curErr.append(
-		np.linalg.norm(
+	elemErr=np.linalg.norm(
 			dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][idx])-origData
 			)
-		)
-	
+	cumRelErr.append(
+		elemErr/simNorm[idx]
+		) # Cumulative relative error of the compressed simulations (Because of the forgetting factor)
+	cumErr.append(elemErr*elemErr)
+	# Cumulative relative error of the compressed simulations (Because of the forgetting factor)
+lines2Print.append(f'{np.sqrt(np.sum(cumErr))}') # Cumulative error
+lines2Print.append(f'{np.mean(cumRelErr)}') # mean relative cumulative error
+originalNumEl = 1
+compressedNumEl = 0
+for core in ttCores:
+	originalNumEl *= core.shape[1]
+	compressedNumEl += np.prod(core.shape)
+compressionRatio= originalNumEl / compressedNumEl
+lines2Print.append(f'{compressionRatio}')
+lines2Print.append('\n')
+with open(outputFilePath+outputFileName,'a') as txt:
+	txt.writelines(' '.join(lines2Print))
+lines2Print=[]
 
+incStep=1
 
+for	simIdx in range (1,6400):
+	cumErr=[]
+	cumRelErr=[]
+	with open(f'./catgelTrainData/catgel_trainData{simIdx}.cgf','rb') as gg:
+		prelimData=np.expand_dims(np.load(gg),-1)
+	dataNorm=np.linalg.norm(prelimData)
+	simNorm.append(dataNorm)
+	stepProbe=time.time()
+	S,ttCores=dmt.ttObject.ttfoa6d(prelimData,ttRanks,ttCores=ttCores,S=S,forgettingFactor=forgettingFactor)
+	stepTime=time.time()-stepProbe
+	print(f'Step {simIdx}, TT-FOA took {round(stepTime,4)} s')
+	nCompressedSims+=1
 
+	lines2Print.append(f'ttFOA')
+	lines2Print.append(f'{stepTime}')
+	lines2Print.append(f'{dataNorm}')
+	stepError.append(
+		np.linalg.norm(
+			dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][:,-1]) - prelimData
+			)
+		) #Norm of the error
+	lines2Print.append(f'{stepError[-1]}') #Error of the current simulation
+	lines2Print.append(f'{stepError[-1]/dataNorm}') #Relative error of the current simulation
+
+	for idx in range(nCompressedSims):
+		origData=np.load(dataLocation+f'catgel_trainData{idx}.cgf')
+		elemErr=np.linalg.norm(
+				dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][idx])-origData
+				)
+		cumRelErr.append(
+			elemErr/simNorm[idx]
+			) # Cumulative relative error of the compressed simulations (Because of the forgetting factor)
+		cumErr.append(elemErr*elemErr)
+		# Cumulative relative error of the compressed simulations (Because of the forgetting factor)
+	lines2Print.append(f'{np.sqrt(np.sum(cumErr))}') # Cumulative error
+	lines2Print.append(f'{np.mean(cumRelErr)}') # mean relative cumulative error
+	originalNumEl = 1
+	compressedNumEl = 0
+	for core in ttCores:
+		originalNumEl *= core.shape[1]
+		compressedNumEl += np.prod(core.shape)
+	compressionRatio= originalNumEl / compressedNumEl
+	lines2Print.append(f'{compressionRatio}')
+	lines2Print.append('\n')
+	with open(outputFilePath+outputFileName,'a') as txt:
+		txt.writelines(' '.join(lines2Print))
+	lines2Print=[]
