@@ -21,16 +21,18 @@ def parallelLoader(dataDir,dataM,infoTuple):
 cwd=os.getcwd()
 
 outputFileName='catgelttFoaTestIUA001.txt'
-outputFilePath=cwd
+outputFilePath=cwd+'/'
 lines2Print=[]
 
 forgettingFactor=0.7
-ttRanks=[1,7,88,656,2745,1469,1] #Final ttRanks for IUA0.01
+ttRanks=[7,88,656,2745,1469] #Final ttRanks for IUA0.01
+ttRanks=[7,56,67,123,110] #Final ttRanks for IUA0.1
+# ttRanks=[7,50,60,80,100] #Low final ranks
 incMethod='TT-FOA'
 scaleData=False
 stackData=True
-message="Starting ttfoaTest.py with method "+incMethod+f" and ranks {' '.join(map(str,ttRanks))} on fxb-2031"
-dmt.dcping(message,'botaks','dorukaks')
+# message="Starting ttfoaTest.py with method "+incMethod+f" and ranks {' '.join(map(str,ttRanks))} on fxb-2031"
+# dmt.dcping(message,'botaks','dorukaks')
 
 timeProbe=time.time()
 
@@ -110,7 +112,7 @@ lines2Print.append(f'{stepTime}') #Time to compute TT-FOA
 lines2Print.append(f'{dataNorm}') #Norm of the simulation
 stepError.append(
 	np.linalg.norm(
-		dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][:,-1]) - prelimData
+		dmt.utils.coreContraction(ttCores[:-1]+[ttCores[-1][:,-1]]) - prelimData.squeeze()
 		)
 	) #Norm of the error
 lines2Print.append(f'{stepError[-1]}') #Error of the current simulation
@@ -118,7 +120,7 @@ lines2Print.append(f'{stepError[-1]/dataNorm}') #Relative error of the current s
 for idx in range(nCompressedSims):
 	origData=np.load(dataLocation+f'catgel_trainData{idx}.cgf')
 	elemErr=np.linalg.norm(
-			dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][idx])-origData
+			dmt.utils.coreContraction(ttCores[:-1]+[ttCores[-1][:,idx]])-origData.squeeze()
 			)
 	cumRelErr.append(
 		elemErr/simNorm[idx]
@@ -144,7 +146,7 @@ incStep=1
 for	simIdx in range (1,6400):
 	cumErr=[]
 	cumRelErr=[]
-	with open(f'./catgelTrainData/catgel_trainData{simIdx}.cgf','rb') as gg:
+	with open(dataLocation+f'catgel_trainData{simIdx}.cgf','rb') as gg:
 		prelimData=np.expand_dims(np.load(gg),-1)
 	dataNorm=np.linalg.norm(prelimData)
 	simNorm.append(dataNorm)
@@ -159,7 +161,7 @@ for	simIdx in range (1,6400):
 	lines2Print.append(f'{dataNorm}')
 	stepError.append(
 		np.linalg.norm(
-			dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][:,-1]) - prelimData
+			dmt.utils.coreContraction(ttCores[:-1]+[ttCores[-1][:,-1]]) - prelimData.squeeze()
 			)
 		) #Norm of the error
 	lines2Print.append(f'{stepError[-1]}') #Error of the current simulation
@@ -168,7 +170,7 @@ for	simIdx in range (1,6400):
 	for idx in range(nCompressedSims):
 		origData=np.load(dataLocation+f'catgel_trainData{idx}.cgf')
 		elemErr=np.linalg.norm(
-				dmt.utils.coreContraction(ttCores[:-1]+ttCores[-1][idx])-origData
+				dmt.utils.coreContraction(ttCores[:-1]+[ttCores[-1][:,idx]])-origData.squeeze()
 				)
 		cumRelErr.append(
 			elemErr/simNorm[idx]
