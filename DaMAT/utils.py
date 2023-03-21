@@ -52,8 +52,8 @@ def coreContraction(cores):
             coreProd = np.tensordot(cores[coreIdx], cores[coreIdx + 1], axes=(-1, 0))
         else:
             coreProd = np.tensordot(coreProd, cores[coreIdx + 1], axes=(-1, 0))
-    coreProd = coreProd.reshape(coreProd.shape[1:-1])
-    return coreProd
+    # coreProd = coreProd.reshape(coreProd.shape[1:-1])
+    return coreProd.squeeze()
 
 
 def deltaSVD(data, dataNorm, dimensions, eps=0.1):
