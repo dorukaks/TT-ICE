@@ -1047,6 +1047,8 @@ class ttObject:
                 ttCores.append(np.random.randn(ttRanks[dimIdx-1],dims[dimIdx],ttRanks[dimIdx]))
             ttCores.append(np.empty((ttRanks[-1],1)))
             coreSwap=True
+        # else:
+        ttCores_old=ttCores.copy()
         if S is None:
             # Initialize S matrices as identity matrices if no S is given from previous step.
             S=[]
@@ -1056,74 +1058,73 @@ class ttObject:
 
         # Update the last core G6
         
-        Ht_1=coreContraction(ttCores[:-1])
+        Ht_1=coreContraction(ttCores_old[:-1])
         # Ht_1=Ht_1.reshape(-1,ttRanks[-1])
         Ht_1=mode_n_unfolding(Ht_1,5).T #this might be 5
-        g6=np.linalg.lstsq(Ht_1,data.reshape(-1),rcond=None)[0].reshape(-1,1)
+        g6=np.linalg.lstsq(Ht_1,data.reshape(-1,order='F'),rcond=None)[0].reshape(-1,1,order='F')
         if coreSwap:
             ttCores[-1]=g6
         else:
             ttCores[-1]=np.hstack((ttCores[-1],g6))
-        recData=(Ht_1@g6).reshape(dims)
+        recData=(Ht_1@g6).reshape(dims,order='F')
         delta=data-recData
 
         # Update G1
         deltaunfold=mode_n_unfolding(delta,0)
-        Bk=coreContraction(ttCores[1:-1]+[g6])
+        Bk=coreContraction(ttCores_old[1:-1]+[g6])
         Wk=mode_n_unfolding(Bk,0)
         S[0]=forgettingFactor*S[0]+Wk@Wk.T
         # Vk=np.linalg.lstsq(S[0],Wk,rcond=None)[0]
         Vk=np.linalg.pinv(S[0])@Wk
-        ttCores[0]=ttCores[0]+deltaunfold@Vk.T
+        ttCores[0]=ttCores_old[0]+deltaunfold@Vk.T
 
         # Update G2
         deltaunfold=mode_n_unfolding(delta,1)
-        Ak=mode_n_unfolding(ttCores[0],2).T
-        Bk=coreContraction(ttCores[2:-1]+[g6])
+        Ak=mode_n_unfolding(ttCores_old[0],2)#.T
+        Bk=coreContraction(ttCores_old[2:-1]+[g6])
         Bk=mode_n_unfolding(Bk,0)
         Wk=np.kron(Bk,Ak)
         S[1]=forgettingFactor*S[1]+Wk@Wk.T
         # Vk=np.linalg.lstsq(S[1],Wk,rcond=None)[0]
         Vk=np.linalg.pinv(S[1])@Wk
-        ttCores[1]=mode_n_unfolding(ttCores[1],1)
+        ttCores[1]=mode_n_unfolding(ttCores_old[1],1)
         ttCores[1]=ttCores[1]+deltaunfold@Vk.T
         ttCores[1]=ttCores[1].reshape(dims[1],ttRanks[0],ttRanks[1],order='F').transpose(1,0,2)
 
         # Update G3
         deltaunfold=mode_n_unfolding(delta,2)
-        Ak=mode_n_unfolding(coreContraction(ttCores[:2]),2)
-        Bk=coreContraction(ttCores[3:-1]+[g6]) #insert a mode 0 unfolding here if necessary
+        Ak=mode_n_unfolding(coreContraction(ttCores_old[:2]),2)
+        Bk=coreContraction(ttCores_old[3:-1]+[g6]) #insert a mode 0 unfolding here if necessary
         Bk=mode_n_unfolding(Bk,0)
         Wk=np.kron(Bk,Ak)
         S[2]=forgettingFactor*S[2]+Wk@Wk.T
         # Vk=np.linalg.lstsq(S[2],Wk,rcond=None)[0]
         Vk=np.linalg.pinv(S[2])@Wk
-        ttCores[2]=mode_n_unfolding(ttCores[2],1)
+        ttCores[2]=mode_n_unfolding(ttCores_old[2],1)
         ttCores[2]=ttCores[2]+deltaunfold@Vk.T
         ttCores[2]=ttCores[2].reshape(dims[2],ttRanks[1],ttRanks[2],order='F').transpose(1,0,2)
 
         # Update G4
         deltaunfold=mode_n_unfolding(delta,3)
-        Ak=mode_n_unfolding(coreContraction(ttCores[:3]),3)
-        Bk=coreContraction(ttCores[4:-1]+[g6]) #insert a mode 0 unfolding here if necessary
+        Ak=mode_n_unfolding(coreContraction(ttCores_old[:3]),3)
+        Bk=coreContraction(ttCores_old[4:-1]+[g6]) #insert a mode 0 unfolding here if necessary
         Wk=np.kron(Bk,Ak)
         S[3]=forgettingFactor=S[3]+Wk@Wk.T
         # Vk=np.linalg.lstsq(S[3],Wk,rcond=None)[0]
         Vk=np.linalg.pinv(S[3])@Wk
-        ttCores[3]=mode_n_unfolding(ttCores[3],1)
+        ttCores[3]=mode_n_unfolding(ttCores_old[3],1)
         ttCores[3]=ttCores[3]+deltaunfold@Vk.T
-
         ttCores[3]=ttCores[3].reshape(dims[3],ttRanks[2],ttRanks[3],order='F').transpose(1,0,2)
 
         # Update G5
         deltaunfold=mode_n_unfolding(delta,4)
-        Ak=mode_n_unfolding(coreContraction(ttCores[:4]),4)
+        Ak=mode_n_unfolding(coreContraction(ttCores_old[:4]),4)
         # Bk=coreContraction(g6) #insert a mode 0 unfolding here if necessary
         Wk=np.kron(g6,Ak)
         S[4]=forgettingFactor=S[4]+Wk@Wk.T
         # Vk=np.linalg.lstsq(S[4],Wk,rcond=None)[0]
         Vk=np.linalg.pinv(S[4])@Wk
-        ttCores[4]=mode_n_unfolding(ttCores[4],1)
+        ttCores[4]=mode_n_unfolding(ttCores_old[4],1)
         ttCores[4]=ttCores[4]+deltaunfold@Vk.T
         ttCores[4]=ttCores[4].reshape(dims[4],ttRanks[3],ttRanks[4],order='F').transpose(1,0,2)
 
