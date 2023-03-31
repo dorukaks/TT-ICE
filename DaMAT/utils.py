@@ -172,3 +172,19 @@ def mode_n_unfolding(tensor,mode):
     dims=[modeIdx]+dims
     tensor=tensor.transpose(dims)
     return tensor.reshape(tensor.shape[0],-1,order='F')
+
+def solve(A,B,method='pinv'):
+    if method=='pinv':
+        try:
+            return np.linalg.pinv(A)@B
+        except np.linalg.LinAlgError:
+            print("Numpy svd did not converge, using qr+svd")
+            q, r = np.linalg.qr(A)
+            return q.T@np.linalg.pinv(r)@B
+    elif method=='lstsq':
+        try:
+            return np.linalg.lstsq(A,B,rcond=None)[0]
+        except np.linalg.LinAlgError:
+            print("Numpy svd did not converge, using qr+svd")
+            q, r = np.linalg.qr(A)
+            return q.T@np.linalg.lstsq(r,B)[0]
