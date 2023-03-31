@@ -36,3 +36,7 @@ array*
 */__pycache__/**
 compression.py
 compressionPipeline.py
+*.txt
+*.npy
+*.npmmp
+*.mat
