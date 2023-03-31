@@ -26,8 +26,8 @@ lines2Print=[]
 
 forgettingFactor=0.7
 ttRanks=[7,88,656,2745,1469] #Final ttRanks for IUA0.01
-ttRanks=[7,56,67,123,110] #Final ttRanks for IUA0.1
-# ttRanks=[7,50,60,80,100] #Low final ranks
+# ttRanks=[7,56,67,123,110] #Final ttRanks for IUA0.1
+ttRanks=[7,20,40,60,80] #Low final ranks
 incMethod='TT-FOA'
 scaleData=False
 stackData=True
@@ -67,6 +67,7 @@ instanceNumber = [71, 72, 73, 74, 75, 76, 77, 78, 79, 80]
 # dataLocation= '/media/dorukaks/Database/Nathan_GelsData'+'/'+DM+'_DM/'
 dataLocation= '/home/dorukaks'+'/'+DM+'_DM/' #for doruk-fxb2031
 dataLocation= '/home/dorukaks/Desktop/GameDataProject/catgelTrainData/' #for doruk-fxb2031
+dataLocation= '/home/doruk/incrementalTensorTrain/catgelTrainData/' #for calab
 
 dataStream=[]
 
