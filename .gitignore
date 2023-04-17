@@ -40,3 +40,4 @@ compressionPipeline.py
 *.npy
 *.npmmp
 *.mat
+*.png
