@@ -706,6 +706,7 @@ class ttObject:
         heuristicsToUse: list = ["skip", "subselect", "occupancy"],
         occupancyThreshold: float = 0.8,
         simpleEpsilonUpdate: bool = False,
+        surrogateThreshold=True
     ) -> None:
         """
         `TT-ICE*`_ algorithmn with heuristic performance upgrades.
@@ -766,12 +767,23 @@ class ttObject:
         if elementwiseEpsilon is None:
             elementwiseEpsilon = self.computeRelError(newTensor)
         if "skip" in heuristicsToUse:
-            if np.mean(elementwiseEpsilon) <= epsilon:
-                newTensor = self.projectTensor(newTensor)
-                self.ttCores[-1] = np.hstack(
-                    (self.ttCores[-1].reshape(self.ttRanks[-2], -1), newTensor)
-                ).reshape(self.ttRanks[-2], -1, 1)
-                return None
+            if surrogateThreshold:
+                if np.mean(elementwiseEpsilon) <= epsilon:
+                    newTensor = self.projectTensor(newTensor)
+                    self.ttCores[-1] = np.hstack(
+                        (self.ttCores[-1].reshape(self.ttRanks[-2], -1), newTensor)
+                    ).reshape(self.ttRanks[-2], -1, 1)
+                    return None
+            else:
+                errorNorm=elementwiseEpsilon*elementwiseNorm
+                errorNorm=np.sqrt(np.sum(errorNorm**2))
+                if errorNorm <= epsilon:
+                    newTensor = self.projectTensor(newTensor)
+                    self.ttCores[-1] = np.hstack(
+                        (self.ttCores[-1].reshape(self.ttRanks[-2], -1), newTensor)
+                    ).reshape(self.ttRanks[-2], -1, 1)
+                    return None
+            annen=2+3
         if tenNorm is None and elementwiseNorm is None:
             tenNorm = np.linalg.norm(newTensor)
         elif tenNorm is None:
