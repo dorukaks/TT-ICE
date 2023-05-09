@@ -542,13 +542,45 @@ class ttObject:
         relError = differenceNorm / elementwiseNorm
         return relError
 
-    def computeRecError(self, data: np.array, start=None, finish=None) -> None:
+    def computeRecError(self, data: np.array, start=None, finish=None, useExact=True) -> None:
         """
         Function to compute relative error by reconstructing data from slices
         of TT-cores.
-        Currently not implemented.
+
+        Parameters
+        ----------
+        data:obj:`np.array`
+            Tensor for which the reconstruction error is computed
+        start:`int`
+            Index for the start of the batch in the compressed last core
+        finish:`int`
+            Index for the end of the batch in the compressed last core 
+        useExact:`bool`
+            Boolean flag determining whether a reconstruction error will be
+            returned for the entire batch or each observation in the batch.
+
+        Returns
+        -------
+        recError:obj:`float` or `np.array`
+            Reconstruction error of the data from cores. Returns an array
+            of reconstruction errors for each observation in the batch if
+            `useExact` is `False`.
         """
-        self.A = 2
+        rec=self.reconstruct(self.ttCores[-1][:,start:finish,:]).reshape(data.shape)
+        elementwiseNorm=np.linalg.norm(data,axis=0)
+        for idx in range(len(data.shape)-2):
+            elementwiseNorm=np.linalg.norm(elementwiseNorm,axis=0)
+        difference=data-rec
+        differenceNorm=np.linalg.norm(difference,axis=0)
+        for idx in range(len(difference.shape)-2):
+            differenceNorm=np.linalg.norm(differenceNorm,axis=0)
+
+        if useExact:
+            recError=np.linalg.norm(differenceNorm)/np.linalg.norm(elementwiseNorm)
+        else:
+            recError=differenceNorm/elementwiseNorm
+
+        return recError
 
     def ttDecomp(self, norm=None, dtype=np.float32) -> "ttObject.ttCores":
         """
