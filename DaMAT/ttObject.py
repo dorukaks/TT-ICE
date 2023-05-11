@@ -566,10 +566,6 @@ class ttObject:
             of reconstruction errors for each observation in the batch if
             `useExact` is `False`.
         """
-        if start is None:
-            start = self.ttCores[-1].shape[1]-1
-        if finish is None:
-            finish = start+1
         rec=self.reconstruct(self.ttCores[-1][:,start:finish,:]).reshape(data.shape)
         elementwiseNorm=np.linalg.norm(data,axis=0)
         for idx in range(len(data.shape)-2):
@@ -671,8 +667,8 @@ class ttObject:
             tenNorm = np.linalg.norm(newTensor)
         if epsilon is None:
             epsilon = self.ttEpsilon
-        newTensorSize = len(newTensor.shape) - 1
         newTensor = newTensor.reshape(list(self.reshapedShape[:-1]) + [-1])[None, :]
+        newTensorSize = len(newTensor.shape) - 1
         newTensor = newTensor.reshape(self.reshapedShape[0], -1)
         Ui = self.ttCores[0].reshape(self.reshapedShape[0], -1)
         Ri = newTensor - Ui @ (Ui.T @ newTensor)
