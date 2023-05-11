@@ -667,8 +667,8 @@ class ttObject:
             tenNorm = np.linalg.norm(newTensor)
         if epsilon is None:
             epsilon = self.ttEpsilon
-        newTensor = newTensor.reshape(list(self.reshapedShape[:-1]) + [-1])[None, :]
         newTensorSize = len(newTensor.shape) - 1
+        newTensor = newTensor.reshape(list(self.reshapedShape[:-1]) + [-1])[None, :]
         newTensor = newTensor.reshape(self.reshapedShape[0], -1)
         Ui = self.ttCores[0].reshape(self.reshapedShape[0], -1)
         Ri = newTensor - Ui @ (Ui.T @ newTensor)
@@ -815,7 +815,6 @@ class ttObject:
                         (self.ttCores[-1].reshape(self.ttRanks[-2], -1), newTensor)
                     ).reshape(self.ttRanks[-2], -1, 1)
                     return None
-            annen=2+3
         if tenNorm is None and elementwiseNorm is None:
             tenNorm = np.linalg.norm(newTensor)
         elif tenNorm is None:
