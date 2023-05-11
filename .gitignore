@@ -41,3 +41,11 @@ compressionPipeline.py
 *.npmmp
 *.mat
 *.png
+*.mp4
+*.jpg
+*.cgf
+build*
+*~
+*.pyc
+*.egg-info*
+*.egg
