@@ -8,12 +8,15 @@ from random import sample
 from datetime import datetime
 from scipy.io import loadmat
 
-rep=20
+cwd = os.getcwd()
+tensorSaveLocation = "/randomTensors/"
 
+rep=20
 dims=[10,15,20,500]
-ranks=[6,15,40]
+ranks=[4,10,30]
 # ranks=[3,5,10]
 forgettingFactor=0.7
+
 tenIdx=0
 totalTime=0
 lines2print=[]
@@ -23,13 +26,14 @@ ttCores=None
 S=None
 errors=np.zeros((20,dims[-1]))
 print('TT-FOA on random tensor')
+print(f"Estimated ranks: "+" ".join(map(str,ranks)))
 for tenIdx in range(rep):
 	totalTime=0
 	print(f'Tensor:{tenIdx}')
 	ttCores=None
 	S=None
 	# xTrue=loadmat('random4d_2_3_5_Tensors.mat')[f'ten{tenIdx}']
-	xTrue=loadmat('random4d_4_10_30_Tensors.mat')[f'ten{tenIdx}']
+	xTrue=loadmat(cwd+tensorSaveLocation+'random4d_4_10_30_Tensors.mat')[f'ten{tenIdx}']
 	for sampleIdx in range(dims[-1]):
 		# cumErr=[]
 		# cumRelErr=[]
@@ -59,15 +63,15 @@ for tenIdx in range(rep):
 		# print(f'{np.sqrt(np.sum(cumErr))}') # Cumulative error
 		# print(f'{np.sqrt(np.sum(cumErr))/np.linalg.norm(xTrue[...,:sampleIdx+1])}')
 		# print(f'{np.mean(cumRelErr)}') # mean relative cumulative error
-	print(f'Total time: {totalTime}')
+	print(f'Compression time: {totalTime}')
 	alltime+=totalTime
 	lines2print.append(f'\n')
 
 # with open('./ttfoaPythonErrors.txt','a') as txt:
 # 	txt.writelines(' '.join(lines2print))
 lines2print=[]
-print(alltime)
-print(alltime/20)
+print(f"A total of {rep} random tensors compressed with TT-FOA: {alltime} seconds")
+print(f"Average compression time per tensor                : {alltime/rep} seconds")
 # np.savetxt("ttfoaOR.txt",errors.mean(0))
 
 # tt_dim = [10,15,20,25,29,500]

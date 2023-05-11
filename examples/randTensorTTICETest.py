@@ -8,18 +8,22 @@ from random import sample
 from datetime import datetime
 from scipy.io import loadmat
 
+cwd = os.getcwd()
+tensorSaveLocation = "/randomTensors/"
+
 rep=20
 tenIdx=0
 epsilon=1e-8
 lines2print=[]
 errors=np.zeros((20,500))
+ranks=[1,4,10,30,1]
 alltime=0
 print('TT-ICE* on random tensor')
 for tenIdx in range(rep):
     print(f'Tensor:{tenIdx}')
     totalTime=0
     # xTrue=loadmat('random4d_2_3_5_Tensors.mat')[f'ten{tenIdx}']
-    xTrue=loadmat('random4d_4_10_30_Tensors.mat')[f'ten{tenIdx}']
+    xTrue=loadmat(cwd+tensorSaveLocation+'random4d_'+'_'.join(map(str,ranks[1:-1]))+'_Tensors.mat')[f'ten{tenIdx}']
     dims=list(xTrue.shape)
     dataSet=dmt.ttObject(xTrue[...,0][...,None],epsilon=epsilon,keepData=False,method='ttsvd')
 
@@ -50,12 +54,12 @@ for tenIdx in range(rep):
     print(f'Final tt-ranks: {dataSet.ttRanks}')
     # for core in dataSet.ttCores:
     #     print(core.shape)
-    print(f'Total time: {totalTime}')
+    print(f'Compression time: {totalTime}')
     lines2print.append(f'\n')
     alltime+=totalTime
 # with open('./tticePythonErrors.txt','a') as txt:
 # 	txt.writelines(' '.join(lines2print))
 lines2print=[]
-print(alltime)
-print(alltime/20)
+print(f"A total of {rep} random tensors compressed with TT-ICE*: {alltime} seconds")
+print(f"Average compression time per tensor                    : {alltime/rep} seconds")
 # np.savetxt("ttice.txt",errors.mean(0))
