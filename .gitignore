@@ -36,3 +36,16 @@ array*
 */__pycache__/**
 compression.py
 compressionPipeline.py
+*.txt
+*.npy
+*.npmmp
+*.mat
+*.png
+*.mp4
+*.jpg
+*.cgf
+build*
+*~
+*.pyc
+*.egg-info*
+*.egg
