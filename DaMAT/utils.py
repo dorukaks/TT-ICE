@@ -52,8 +52,8 @@ def coreContraction(cores):
             coreProd = np.tensordot(cores[coreIdx], cores[coreIdx + 1], axes=(-1, 0))
         else:
             coreProd = np.tensordot(coreProd, cores[coreIdx + 1], axes=(-1, 0))
-    # coreProd = coreProd.reshape(coreProd.shape[1:-1])
-    return coreProd.squeeze()
+    coreProd = coreProd.reshape(coreProd.shape[1:-1])
+    return coreProd
 
 
 def deltaSVD(data, dataNorm, dimensions, eps=0.1):
@@ -162,29 +162,3 @@ def ttsvd(data, dataNorm, eps=0.1, dtype=np.float32):
     ranks.append(1)
     cores.append(data.reshape(ranks[-2], inputShape[-1], ranks[-1], order="F"))
     return ranks, cores
-
-def mode_n_unfolding(tensor,mode):
-    # Computes mode-n unfolding/matricization of a tensor in the sense of Kolda&Bader
-    # Assumes the mode is given in 0 indexed format
-    nDims = len(tensor.shape)
-    dims = [dim for dim in range(nDims)]
-    modeIdx = dims.pop(mode)
-    dims=[modeIdx]+dims
-    tensor=tensor.transpose(dims)
-    return tensor.reshape(tensor.shape[0],-1,order='F')
-
-def solve(A,B,method='pinv'):
-    if method=='pinv':
-        try:
-            return np.linalg.pinv(A)@B
-        except np.linalg.LinAlgError:
-            print("Numpy svd did not converge, using qr+svd")
-            q, r = np.linalg.qr(A)
-            return q.T@np.linalg.pinv(r)@B
-    elif method=='lstsq':
-        try:
-            return np.linalg.lstsq(A,B,rcond=None)[0]
-        except np.linalg.LinAlgError:
-            print("Numpy svd did not converge, using qr+svd")
-            q, r = np.linalg.qr(A)
-            return q.T@np.linalg.lstsq(r,B)[0]
