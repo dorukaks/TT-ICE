@@ -539,11 +539,7 @@ class ttObject:
         differenceNorm = np.linalg.norm(difference, axis=0)
         for _ in range(len(difference.shape) - 2):
             differenceNorm = np.linalg.norm(differenceNorm, axis=0)
-        
-        if useExact:
-            relError = np.linalg.norm(differenceNorm)/np.linalg.norm(elementwiseNorm)
-        else:
-            relError = differenceNorm / elementwiseNorm
+        relError = differenceNorm / elementwiseNorm
         return relError
 
     def computeRecError(self, data: np.array, start=None, finish=None, useExact=True) -> None:
@@ -570,6 +566,10 @@ class ttObject:
             of reconstruction errors for each observation in the batch if
             `useExact` is `False`.
         """
+        if start is None:
+            start = self.ttCores[-1].shape[1]-1
+        if finish is None:
+            finish = start+1
         rec=self.reconstruct(self.ttCores[-1][:,start:finish,:]).reshape(data.shape)
         elementwiseNorm=np.linalg.norm(data,axis=0)
         for idx in range(len(data.shape)-2):
