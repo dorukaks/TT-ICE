@@ -1,0 +1,1 @@
+This directory will contain synthetically generated random tensors for TT-FOA comparison experiments.
