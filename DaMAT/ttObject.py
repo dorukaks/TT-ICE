@@ -1068,7 +1068,7 @@ class ttObject:
             tt1.ttRanks.append(core.shape[-1])
         if rounding:
             tenNorm = ttObject.ttNorm(tt1)
-            tt1.rounding(tenNorm, epsilon=epsilon)
+            tt1.ttRound(tenNorm, epsilon=epsilon)
         return tt1
 
     @staticmethod
