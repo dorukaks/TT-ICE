@@ -1,0 +1,1 @@
+This directory will contain the generated TT-cores in form of `.npy` files from numerical experiments.
