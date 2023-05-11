@@ -539,7 +539,11 @@ class ttObject:
         differenceNorm = np.linalg.norm(difference, axis=0)
         for _ in range(len(difference.shape) - 2):
             differenceNorm = np.linalg.norm(differenceNorm, axis=0)
-        relError = differenceNorm / elementwiseNorm
+        
+        if useExact:
+            relError = np.linalg.norm(differenceNorm)/np.linalg.norm(elementwiseNorm)
+        else:
+            relError = differenceNorm / elementwiseNorm
         return relError
 
     def computeRecError(self, data: np.array, start=None, finish=None, useExact=True) -> None:
