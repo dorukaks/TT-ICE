@@ -302,7 +302,7 @@ class ttObject:
     @staticmethod
     def loadData(fileName: str, numCores=None) -> "ttObject":
         """
-        Loads data from a `.ttc` or `.txt` file
+        Loads data from a `.ttc`, `.npy`, or `.txt` file
 
 
         Static method to load TT-cores into a ttObject object.
@@ -337,6 +337,16 @@ class ttObject:
                     np.loadtxt(f"{fileBody}_{coreIdx}.{fileExt}").reshape[coreShape]
                 )
             return coreList
+        elif fileExt == "npy":
+            if numCores is None:
+                raise ValueError("Number of cores are not defined!!")
+            fileBody = fileName.split(".")[0]
+            coreList = []
+            for coreIdx in range(numCores):
+                coreList.append(
+                    np.load(f"{fileBody}_{coreIdx}.{fileExt}")
+                )
+            return ttObject(coreList)
         else:
             raise ValueError(f"{fileExt} files are not supported!")
 
