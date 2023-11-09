@@ -302,7 +302,7 @@ class ttObject:
     @staticmethod
     def loadData(fileName: str, numCores=None) -> "ttObject":
         """
-        Loads data from a `.ttc` or `.txt` file
+        Loads data from a `.ttc`, `.npy`, or `.txt` file
 
 
         Static method to load TT-cores into a ttObject object.
