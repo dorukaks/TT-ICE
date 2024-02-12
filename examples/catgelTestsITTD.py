@@ -112,12 +112,12 @@ for snapshotIdx in range(initialize,numberSimulations,increment):
     snapshots=[]
     if snapshotIdx+increment<numberSimulations:
         for batchIdx in range(snapshotIdx,snapshotIdx+increment):
-            snapshot = np.load(simulationDir+simulationFileName+f"{snapshotIdx}.cgf")[...,None]
+            snapshot = np.load(simulationDir+simulationFileName+f"{batchIdx}.cgf")[...,None]
             snapshots.append(snapshot)
             compressedSnapshots.append(batchIdx)
     else:
         for batchIdx in range(snapshotIdx,numberSimulations):
-            snapshot = np.load(simulationDir+simulationFileName+f"{snapshotIdx}.cgf")[...,None]
+            snapshot = np.load(simulationDir+simulationFileName+f"{batchIdx}.cgf")[...,None]
             snapshots.append(snapshot)
             compressedSnapshots.append(batchIdx)
     snapshots=np.concatenate(snapshots,axis=-1)
